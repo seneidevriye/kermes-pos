@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Eryaman Etkinlik — Garson</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --accent: #f0a500;
+    --accent2: #e05c2a;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --text: #f0f0f0;
+    --muted: #7a7f9a;
+    --border: #2e3250;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+  /* LOGIN */
+  #login-screen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 2rem; gap: 1.5rem;
+  }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; color: var(--accent); letter-spacing: 4px; }
+  .logo span { color: var(--accent2); }
+  .login-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 2rem; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 1rem;
+  }
+  .login-card h2 { font-size: 1.1rem; color: var(--muted); font-weight: 500; }
+  input {
+    width: 100%; padding: 0.85rem 1rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 1rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: var(--accent); }
+  .btn {
+    width: 100%; padding: 0.9rem; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-green { background: var(--green); color: #fff; }
+
+  /* APP */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+
+  /* HEADER */
+  .header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent); letter-spacing: 2px; }
+  .garson-badge {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 20px;
+    padding: 0.3rem 0.8rem; font-size: 0.8rem; color: var(--muted);
+  }
+  .garson-badge span { color: var(--text); font-weight: 600; }
+  .cikis-btn {
+    background: transparent; border: 1px solid var(--border); border-radius: 8px;
+    color: var(--muted); font-size: 0.75rem; padding: 0.3rem 0.7rem; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+  }
+  .cikis-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* TABS */
+  .tabs {
+    display: flex; background: var(--surface); border-bottom: 1px solid var(--border);
+    position: sticky; top: 57px; z-index: 99;
+  }
+  .tab {
+    flex: 1; padding: 0.8rem; text-align: center; font-size: 0.85rem; font-weight: 600;
+    color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* CONTENT */
+  .content { padding: 1rem; flex: 1; }
+
+  /* MASA SEÇ */
+  .section-title {
+    font-size: 0.75rem; font-weight: 700; color: var(--muted); letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 0.75rem;
+  }
+  .masa-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-bottom: 1.5rem; }
+  .masa-btn {
+    background: var(--surface); border: 2px solid var(--border); border-radius: 10px;
+    padding: 0.8rem 0.5rem; text-align: center; cursor: pointer; transition: all 0.15s;
+    font-weight: 600; font-size: 0.9rem;
+  }
+  .masa-btn:active { transform: scale(0.95); }
+  .masa-btn.selected { border-color: var(--accent); background: rgba(240,165,0,0.1); color: var(--accent); }
+
+  /* ÜRÜNLER */
+  .kategori-scroll {
+    display: flex; gap: 0.5rem; overflow-x: auto; margin-bottom: 1rem; padding-bottom: 0.25rem;
+    scrollbar-width: none;
+  }
+  .kategori-scroll::-webkit-scrollbar { display: none; }
+  .kat-chip {
+    white-space: nowrap; padding: 0.4rem 1rem; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.15s; font-weight: 500;
+  }
+  .kat-chip.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+
+  .urun-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 1.5rem; }
+  .urun-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1rem; cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden;
+  }
+  .urun-card:active { transform: scale(0.97); }
+  .urun-card.added { border-color: var(--accent); }
+  .urun-adi { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem; }
+  .urun-fiyat { font-size: 0.85rem; color: var(--accent); font-weight: 700; }
+  .urun-adet-badge {
+    position: absolute; top: 8px; right: 8px; background: var(--accent); color: #000;
+    border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700;
+  }
+
+  /* SEPET */
+  .sepet-bos { text-align: center; color: var(--muted); padding: 3rem 1rem; font-size: 0.95rem; }
+  .sepet-item {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 0.75rem 1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem;
+  }
+  .sepet-item-adi { flex: 1; font-weight: 600; font-size: 0.9rem; }
+  .sepet-item-fiyat { color: var(--accent); font-weight: 700; font-size: 0.85rem; min-width: 60px; text-align: right; }
+  .adet-control { display: flex; align-items: center; gap: 0.4rem; }
+  .adet-btn {
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text); font-size: 1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-weight: 700;
+  }
+  .adet-sayi { font-weight: 700; min-width: 20px; text-align: center; }
+
+  .toplam-bar {
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 1rem; position: sticky; bottom: 0;
+  }
+  .toplam-satir { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+  .toplam-label { color: var(--muted); font-size: 0.9rem; }
+  .toplam-tutar { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--accent); }
+
+  /* SİPARİŞLERİM */
+  .siparis-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1rem; margin-bottom: 0.75rem;
+  }
+  .siparis-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+  .siparis-masa { font-weight: 700; font-size: 1rem; }
+  .siparis-sure { font-size: 0.75rem; color: var(--muted); }
+  .siparis-durum {
+    display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.7rem;
+    border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem;
+  }
+  .durum-bekliyor { background: rgba(240,165,0,0.15); color: var(--accent); }
+  .durum-hazirlaniyor { background: rgba(224,92,42,0.15); color: var(--accent2); }
+  .durum-hazir { background: rgba(46,204,113,0.2); color: var(--green); }
+  .durum-teslim { background: rgba(122,127,154,0.15); color: var(--muted); }
+  .siparis-urunler { font-size: 0.85rem; color: var(--muted); }
+
+  /* HAZIR BİLDİRİM */
+  #hazir-bildirim {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85); z-index: 999; align-items: center; justify-content: center;
+  }
+  .bildirim-kart {
+    background: var(--surface); border: 2px solid var(--green); border-radius: var(--radius);
+    padding: 2rem; text-align: center; max-width: 320px; width: 90%; animation: pulse-border 1s infinite;
+  }
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(46,204,113,0.4); }
+    50% { box-shadow: 0 0 0 12px rgba(46,204,113,0); }
+  }
+  .bildirim-emoji { font-size: 3rem; margin-bottom: 0.5rem; }
+  .bildirim-baslik { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--green); margin-bottom: 0.25rem; }
+  .bildirim-masa { font-size: 1.1rem; color: var(--text); margin-bottom: 1.5rem; }
+
+  .bildirim-kuyruk {
+    position: absolute; top: -10px; right: -10px; background: var(--accent2); color: #fff;
+    border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .empty-state { text-align: center; color: var(--muted); padding: 2rem; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="logo">ERYAMAN<span>ETKINLIK</span></div>
+  <div class="login-card">
+    <h2>Garson Girişi</h2>
+    <input type="text" id="garson-adi" placeholder="Adınızı girin..." maxlength="30">
+    <button class="btn btn-primary" onclick="girisYap()">Giriş Yap</button>
+  </div>
+  <div style="display:flex;gap:1rem;margin-top:0.5rem;">
+    <a href="mutfak.html" style="color:var(--muted);font-size:0.85rem;text-decoration:none;">🍳 Mutfak</a>
+    <a href="kasa.html" style="color:var(--muted);font-size:0.85rem;text-decoration:none;">💰 Kasa</a>
+    <a href="yonetici.html" style="color:var(--muted);font-size:0.85rem;text-decoration:none;">⚙️ Yönetici</a>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="header">
+    <div class="header-title">KERMES<span style="color:var(--accent2)">POS</span></div>
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <div class="garson-badge">👤 <span id="garson-adi-badge"></span></div>
+      <button class="cikis-btn" onclick="cikisYap()">Çıkış</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="sekmeAc('siparis-tab', this)">🛒 Sipariş</div>
+    <div class="tab" onclick="sekmeAc('siparislerim-tab', this)">📋 Siparişlerim</div>
+  </div>
+
+  <!-- SİPARİŞ TAB -->
+  <div id="siparis-tab" class="content">
+    <div class="section-title">Masa Seç</div>
+    <div class="masa-grid" id="masa-grid"></div>
+
+    <div class="section-title">Ürünler</div>
+    <div class="kategori-scroll" id="kat-scroll"></div>
+    <div class="urun-grid" id="urun-grid"></div>
+
+    <div class="section-title">Not (opsiyonel)</div>
+    <textarea class="input not-input" id="siparis-not" placeholder="Özel istek, alerji vb..."></textarea>
+  </div>
+
+  <!-- SİPARİŞLERİM TAB -->
+  <div id="siparislerim-tab" class="content" style="display:none;">
+    <div id="siparislerim-liste"></div>
+  </div>
+
+  <div class="toplam-bar" id="toplam-bar" style="display:none;">
+    <div class="toplam-satir">
+      <span class="toplam-label">Toplam</span>
+      <span class="toplam-tutar" id="toplam-tutar">₺0</span>
+    </div>
+    <button class="btn btn-primary" onclick="siparisGonder()">Siparişi Gönder →</button>
+  </div>
+</div>
+
+<!-- HAZIR BİLDİRİM -->
+<div id="hazir-bildirim">
+  <div class="bildirim-kart" style="position:relative;">
+    <div class="bildirim-kuyruk" id="bildirim-kuyruk-sayi" style="display:none;"></div>
+    <div class="bildirim-emoji">🔔</div>
+    <div class="bildirim-baslik">SİPARİŞ HAZIR!</div>
+    <div class="bildirim-masa" id="bildirim-masa-text"></div>
+    <button class="btn btn-green" onclick="bildirimKapat()">Teslim Alındı ✓</button>
+  </div>
+</div>
+
+<script type="module">
+import { db } from './firebase-config.js';
+import { ref, push, onValue, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+let garsonAdi = '';
+let masalar = [];
+let urunler = [];
+let sepet = {};
+let seciliMasa = null;
+let aktifKategori = 'Tümü';
+let siparislerim = {};
+let bildirimGosterilenler = new Set();
+let bildirimKuyrugu = []; // Kuyruk sistemi
+let bildirimAktif = false;
+
+// Sayfa açılışında localStorage'dan oturumu kontrol et
+const kayitliAd = localStorage.getItem('kermes_garson');
+if (kayitliAd) {
+  garsonAdi = kayitliAd;
+  document.getElementById('garson-adi-badge').textContent = kayitliAd;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  baslat();
+}
+
+window.girisYap = function() {
+  const ad = document.getElementById('garson-adi').value.trim();
+  if (!ad) { alert('Lütfen adınızı girin!'); return; }
+  garsonAdi = ad;
+  localStorage.setItem('kermes_garson', ad);
+  document.getElementById('garson-adi-badge').textContent = ad;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  baslat();
+};
+
+window.cikisYap = function() {
+  if (confirm('Çıkış yapmak istiyor musunuz?')) {
+    localStorage.removeItem('kermes_garson');
+    location.reload();
+  }
+};
+
+document.getElementById('garson-adi').addEventListener('keypress', e => {
+  if (e.key === 'Enter') window.girisYap();
+});
+
+function baslat() {
+  // Masaları dinle
+  onValue(ref(db, 'masalar'), snap => {
+    masalar = [];
+    if (snap.exists()) {
+      snap.forEach(c => masalar.push({ id: c.key, ...c.val() }));
+    }
+    masaGridRender();
+  });
+
+  // Ürünleri dinle
+  onValue(ref(db, 'urunler'), snap => {
+    urunler = [];
+    if (snap.exists()) {
+      snap.forEach(c => urunler.push({ id: c.key, ...c.val() }));
+    }
+    urunGridRender();
+    kategoriRender();
+  });
+
+  // Siparişleri dinle
+  onValue(ref(db, 'siparisler'), snap => {
+    siparislerim = {};
+    if (snap.exists()) {
+      snap.forEach(c => {
+        const s = { id: c.key, ...c.val() };
+        if (s.garson === garsonAdi && s.durum !== 'teslim' && s.durum !== 'odendi') {
+          siparislerim[c.key] = s;
+          // Hazır bildirim
+          if (s.durum === 'hazir' && !bildirimGosterilenler.has(c.key)) {
+            bildirimGosterilenler.add(c.key);
+            bildirimGoster(s);
+          }
+        }
+      });
+    }
+    siparislerimRender();
+  });
+}
+
+function masaGridRender() {
+  const grid = document.getElementById('masa-grid');
+  if (masalar.length === 0) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Henüz masa eklenmemiş.<br>Yönetici panelinden ekleyin.</div>';
+    return;
+  }
+  grid.innerHTML = masalar.map(m =>
+    `<div class="masa-btn ${seciliMasa === m.id ? 'selected' : ''}" onclick="masaSec('${m.id}', '${m.ad}')">${m.ad}</div>`
+  ).join('');
+}
+
+window.masaSec = function(id, ad) {
+  seciliMasa = id;
+  document.querySelectorAll('.masa-btn').forEach(b => b.classList.remove('selected'));
+  event.target.classList.add('selected');
+  sepetGuncelle();
+};
+
+function kategoriRender() {
+  const kategoriler = ['Tümü', ...new Set(urunler.map(u => u.kategori).filter(Boolean))];
+  document.getElementById('kat-scroll').innerHTML = kategoriler.map(k =>
+    `<div class="kat-chip ${aktifKategori === k ? 'active' : ''}" onclick="kategoriSec('${k}')">${k}</div>`
+  ).join('');
+}
+
+window.kategoriSec = function(k) {
+  aktifKategori = k;
+  kategoriRender();
+  urunGridRender();
+};
+
+function urunGridRender() {
+  const filtered = aktifKategori === 'Tümü' ? urunler : urunler.filter(u => u.kategori === aktifKategori);
+  if (filtered.length === 0) {
+    document.getElementById('urun-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1">Bu kategoride ürün yok.</div>';
+    return;
+  }
+  document.getElementById('urun-grid').innerHTML = filtered.map(u => {
+    const adet = sepet[u.id]?.adet || 0;
+    return `<div class="urun-card ${adet > 0 ? 'added' : ''}" onclick="urunEkle('${u.id}')">
+      ${adet > 0 ? `<div class="urun-adet-badge">${adet}</div>` : ''}
+      <div class="urun-adi">${u.ad}</div>
+      <div class="urun-fiyat">₺${u.fiyat}</div>
+    </div>`;
+  }).join('');
+}
+
+window.urunEkle = function(uid) {
+  const urun = urunler.find(u => u.id === uid);
+  if (!urun) return;
+  if (!sepet[uid]) sepet[uid] = { ...urun, adet: 0 };
+  sepet[uid].adet++;
+  urunGridRender();
+  sepetGuncelle();
+};
+
+function sepetGuncelle() {
+  const items = Object.values(sepet).filter(s => s.adet > 0);
+  const toplam = items.reduce((t, s) => t + s.fiyat * s.adet, 0);
+  const bar = document.getElementById('toplam-bar');
+  if (items.length > 0 && seciliMasa) {
+    bar.style.display = 'block';
+    document.getElementById('toplam-tutar').textContent = `₺${toplam}`;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+window.siparisGonder = async function() {
+  const items = Object.values(sepet).filter(s => s.adet > 0);
+  if (!seciliMasa) { alert('Masa seçin!'); return; }
+  if (items.length === 0) { alert('Sepet boş!'); return; }
+
+  const masaAd = masalar.find(m => m.id === seciliMasa)?.ad || seciliMasa;
+  const not = document.getElementById('siparis-not').value.trim();
+
+  await push(ref(db, 'siparisler'), {
+    garson: garsonAdi,
+    masaId: seciliMasa,
+    masaAd,
+    urunler: items.map(i => ({ ad: i.ad, fiyat: i.fiyat, adet: i.adet })),
+    toplam: items.reduce((t, i) => t + i.fiyat * i.adet, 0),
+    not: not || '',
+    durum: 'bekliyor',
+    zaman: serverTimestamp()
+  });
+
+  sepet = {};
+  seciliMasa = null;
+  document.getElementById('siparis-not').value = '';
+  urunGridRender();
+  masaGridRender();
+  sepetGuncelle();
+  sekmeAc('siparislerim-tab', document.querySelectorAll('.tab')[1]);
+};
+
+function siparislerimRender() {
+  const liste = document.getElementById('siparislerim-liste');
+  const items = Object.values(siparislerim);
+  if (items.length === 0) {
+    liste.innerHTML = '<div class="sepet-bos">Aktif siparişiniz yok 🎉</div>';
+    return;
+  }
+  items.sort((a, b) => (b.zaman || 0) - (a.zaman || 0));
+  liste.innerHTML = items.map(s => {
+    const sure = sureFmt(s.zaman);
+    const durumClass = { bekliyor: 'durum-bekliyor', hazirlaniyor: 'durum-hazirlaniyor', hazir: 'durum-hazir' }[s.durum] || '';
+    const durumText = { bekliyor: '⏳ Bekliyor', hazirlaniyor: '🔥 Hazırlanıyor', hazir: '✅ Hazır' }[s.durum] || s.durum;
+    return `<div class="siparis-card">
+      <div class="siparis-header">
+        <div class="siparis-masa">${s.masaAd}</div>
+        <div class="siparis-sure">${sure}</div>
+      </div>
+      <div class="siparis-durum ${durumClass}">${durumText}</div>
+      <div class="siparis-urunler">${s.urunler.map(u => `${u.adet}x ${u.ad}`).join(', ')}</div>
+      ${s.not ? `<div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem;">📝 ${s.not}</div>` : ''}
+      <div style="font-size:0.85rem;color:var(--accent);font-weight:700;margin-top:0.5rem;">₺${s.toplam}</div>
+    </div>`;
+  }).join('');
+}
+
+function bildirimGoster(s) {
+  // Kuyruğa ekle (zaten kuyruktaysa ekleme)
+  if (!bildirimKuyrugu.find(k => k.id === s.id)) {
+    bildirimKuyrugu.push(s);
+  }
+  if (!bildirimAktif) bildirimSiradakiniGoster();
+}
+
+function bildirimSiradakiniGoster() {
+  if (bildirimKuyrugu.length === 0) {
+    bildirimAktif = false;
+    document.getElementById('hazir-bildirim').style.display = 'none';
+    return;
+  }
+  bildirimAktif = true;
+  const s = bildirimKuyrugu[0];
+  window._bildirimSipId = s.id;
+  document.getElementById('bildirim-masa-text').textContent = `${s.masaAd} — ${s.urunler.map(u => `${u.adet}x ${u.ad}`).join(', ')}`;
+  document.getElementById('hazir-bildirim').style.display = 'flex';
+  // Kuyruk sayacı
+  const sayacEl = document.getElementById('bildirim-kuyruk-sayi');
+  if (bildirimKuyrugu.length > 1) {
+    sayacEl.style.display = 'flex';
+    sayacEl.textContent = `+${bildirimKuyrugu.length - 1}`;
+  } else {
+    sayacEl.style.display = 'none';
+  }
+}
+
+window.bildirimKapat = async function() {
+  if (window._bildirimSipId) {
+    await update(ref(db, `siparisler/${window._bildirimSipId}`), { durum: 'teslim' });
+  }
+  bildirimKuyrugu.shift(); // İlkini kaldır
+  bildirimSiradakiniGoster(); // Sıradakini göster
+};
+
+window.sekmeAc = function(tabId, el) {
+  document.getElementById('siparis-tab').style.display = 'none';
+  document.getElementById('siparislerim-tab').style.display = 'none';
+  document.getElementById(tabId).style.display = 'block';
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (tabId === 'siparis-tab') {
+    sepetGuncelle();
+  }
+};
+
+function sureFmt(ts) {
+  if (!ts) return '';
+  const sn = Math.floor((Date.now() - ts) / 1000);
+  if (sn < 60) return `${sn}sn önce`;
+  const dk = Math.floor(sn / 60);
+  if (dk < 60) return `${dk}dk önce`;
+  return `${Math.floor(dk / 60)}sa önce`;
+}
+
+// Her 10 sn süre güncelle
+setInterval(() => siparislerimRender(), 10000);
+</script>
+</body>
+</html>

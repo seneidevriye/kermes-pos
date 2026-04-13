@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eryaman Etkinlik — Yönetici</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f18;
+    --surface: #17172a;
+    --surface2: #1f1f38;
+    --accent: #a78bfa;
+    --accent2: #7c3aed;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --gold: #f0a500;
+    --text: #ede9fe;
+    --muted: #7c7ca0;
+    --border: #2a2a4a;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+  /* PIN */
+  #pin-screen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 2rem; gap: 1.5rem;
+  }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--accent); letter-spacing: 3px; }
+  .pin-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 2rem; width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 1rem;
+  }
+  .pin-card h2 { font-size: 1rem; color: var(--muted); text-align: center; }
+  .pin-dots { display: flex; gap: 0.75rem; justify-content: center; margin: 0.5rem 0; }
+  .pin-dot {
+    width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); transition: all 0.15s;
+  }
+  .pin-dot.filled { background: var(--accent); border-color: var(--accent); }
+  .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .pin-btn {
+    padding: 1rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-size: 1.3rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s;
+  }
+  .pin-btn:active { background: var(--accent2); transform: scale(0.95); }
+  .pin-btn.sil { color: var(--red); }
+  .pin-hata { color: var(--red); text-align: center; font-size: 0.85rem; animation: shake 0.3s; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+
+  /* APP */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+  .header {
+    background: var(--surface); border-bottom: 2px solid var(--accent2);
+    padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--accent); letter-spacing: 3px; }
+  .nav-links { display: flex; gap: 1rem; padding: 0.75rem 1.5rem; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .nav-links a { color: var(--muted); font-size: 0.82rem; text-decoration: none; }
+
+  .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .tab {
+    flex: 1; padding: 0.8rem; text-align: center; font-size: 0.85rem; font-weight: 600;
+    color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .content { padding: 1rem; }
+
+  input, select, textarea {
+    width: 100%; padding: 0.8rem 1rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  select option { background: var(--surface2); }
+
+  .form-group { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem; }
+  .form-label { font-size: 0.8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+
+  .btn {
+    padding: 0.8rem 1.25rem; border: none; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.15s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); color: #000; width: 100%; }
+  .btn-danger { background: rgba(231,76,60,0.15); color: var(--red); border: 1px solid rgba(231,76,60,0.3); }
+
+  .add-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1.25rem; margin-bottom: 1.5rem;
+  }
+  .add-card-title { font-size: 0.85rem; font-weight: 700; color: var(--accent); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .liste-title {
+    font-size: 0.75rem; font-weight: 700; color: var(--muted); letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 0.75rem;
+  }
+
+  .item-row {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 0.75rem 1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem;
+  }
+  .item-info { flex: 1; }
+  .item-adi { font-weight: 600; font-size: 0.95rem; }
+  .item-alt { font-size: 0.78rem; color: var(--muted); margin-top: 0.1rem; }
+  .item-fiyat { color: var(--gold); font-weight: 700; font-size: 0.9rem; }
+
+  .kat-badge {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+    padding: 0.1rem 0.5rem; font-size: 0.72rem; color: var(--muted); font-weight: 600;
+  }
+
+  .bos { text-align: center; color: var(--muted); padding: 2rem; font-size: 0.9rem; }
+
+  .rapor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+  .rapor-kart {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1rem; text-align: center;
+  }
+  .rapor-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--accent); }
+  .rapor-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; }
+</style>
+</head>
+<body>
+
+<!-- PIN -->
+<div id="pin-screen">
+  <div class="logo">⚙️ YÖNETİCİ</div>
+  <div class="pin-card">
+    <h2>PIN Girin</h2>
+    <div class="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div id="pin-hata" class="pin-hata" style="display:none;">Yanlış PIN!</div>
+    <div class="pin-grid">
+      <div class="pin-btn" onclick="pinGir('1')">1</div>
+      <div class="pin-btn" onclick="pinGir('2')">2</div>
+      <div class="pin-btn" onclick="pinGir('3')">3</div>
+      <div class="pin-btn" onclick="pinGir('4')">4</div>
+      <div class="pin-btn" onclick="pinGir('5')">5</div>
+      <div class="pin-btn" onclick="pinGir('6')">6</div>
+      <div class="pin-btn" onclick="pinGir('7')">7</div>
+      <div class="pin-btn" onclick="pinGir('8')">8</div>
+      <div class="pin-btn" onclick="pinGir('9')">9</div>
+      <div class="pin-btn sil" onclick="pinSil()">⌫</div>
+      <div class="pin-btn" onclick="pinGir('0')">0</div>
+      <div class="pin-btn" style="opacity:0" disabled></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="header">
+    <div class="header-title">⚙️ YÖNETİCİ</div>
+  </div>
+  <div class="nav-links">
+    <a href="index.html">📱 Garson</a>
+    <a href="mutfak.html">🍳 Mutfak</a>
+    <a href="kasa.html">💰 Kasa</a>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="sekmeAc('urun-tab', this)">🍽️ Ürünler</div>
+    <div class="tab" onclick="sekmeAc('masa-tab', this)">🪑 Masalar</div>
+    <div class="tab" onclick="sekmeAc('rapor-tab', this)">📊 Rapor</div>
+  </div>
+
+  <!-- ÜRÜNLER -->
+  <div id="urun-tab" class="content">
+    <div class="add-card">
+      <div class="add-card-title">➕ Yeni Ürün Ekle</div>
+      <div class="form-group">
+        <div class="form-label">Ürün Adı</div>
+        <input type="text" id="urun-ad" placeholder="Örn: Çay">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <div class="form-label">Fiyat (₺)</div>
+          <input type="number" id="urun-fiyat" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Kategori</div>
+          <input type="text" id="urun-kat" placeholder="İçecek, Tatlı...">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="urunEkle()">Ekle</button>
+    </div>
+    <div class="liste-title">Mevcut Ürünler</div>
+    <div id="urun-liste"></div>
+  </div>
+
+  <!-- MASALAR -->
+  <div id="masa-tab" class="content" style="display:none;">
+    <div class="add-card">
+      <div class="add-card-title">➕ Yeni Masa Ekle</div>
+      <div class="form-group">
+        <div class="form-label">Masa Adı</div>
+        <input type="text" id="masa-ad" placeholder="Örn: A1, Teras 3...">
+      </div>
+      <button class="btn btn-primary" onclick="masaEkle()">Ekle</button>
+    </div>
+    <div class="liste-title">Mevcut Masalar</div>
+    <div id="masa-liste"></div>
+  </div>
+
+  <!-- RAPOR -->
+  <div id="rapor-tab" class="content" style="display:none;">
+    <div class="rapor-grid">
+      <div class="rapor-kart">
+        <div class="rapor-val" id="r-toplam-sip">0</div>
+        <div class="rapor-label">Toplam Sipariş</div>
+      </div>
+      <div class="rapor-kart">
+        <div class="rapor-val" id="r-ciro">₺0</div>
+        <div class="rapor-label">Günlük Ciro</div>
+      </div>
+      <div class="rapor-kart">
+        <div class="rapor-val" id="r-bekleyen">0</div>
+        <div class="rapor-label">Bekleyen</div>
+      </div>
+      <div class="rapor-kart">
+        <div class="rapor-val" id="r-tamamlanan">0</div>
+        <div class="rapor-label">Tamamlanan</div>
+      </div>
+    </div>
+    <div class="liste-title">En Çok Satan Ürünler</div>
+    <div id="r-urun-liste"></div>
+    <br>
+    <button class="btn btn-danger" style="width:100%" onclick="siparisleriSifirla()">🗑️ Tüm Siparişleri Sıfırla</button>
+  </div>
+</div>
+
+<script type="module">
+import { db } from './firebase-config.js';
+import { ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const PIN = '1234';
+let pinGirilen = '';
+let urunler = {};
+let masalar = {};
+let siparisler = {};
+
+// PIN
+window.pinGir = function(d) {
+  if (pinGirilen.length >= 4) return;
+  pinGirilen += d;
+  pinGuncelle();
+  if (pinGirilen.length === 4) {
+    if (pinGirilen === PIN) {
+      document.getElementById('pin-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'flex';
+      baslat();
+    } else {
+      document.getElementById('pin-hata').style.display = 'block';
+      setTimeout(() => {
+        pinGirilen = '';
+        pinGuncelle();
+        document.getElementById('pin-hata').style.display = 'none';
+      }, 800);
+    }
+  }
+};
+
+window.pinSil = function() {
+  pinGirilen = pinGirilen.slice(0, -1);
+  pinGuncelle();
+};
+
+function pinGuncelle() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById(`d${i}`).classList.toggle('filled', i < pinGirilen.length);
+  }
+}
+
+function baslat() {
+  onValue(ref(db, 'urunler'), snap => {
+    urunler = {};
+    if (snap.exists()) snap.forEach(c => { urunler[c.key] = { id: c.key, ...c.val() }; });
+    urunListeRender();
+  });
+
+  onValue(ref(db, 'masalar'), snap => {
+    masalar = {};
+    if (snap.exists()) snap.forEach(c => { masalar[c.key] = { id: c.key, ...c.val() }; });
+    masaListeRender();
+  });
+
+  onValue(ref(db, 'siparisler'), snap => {
+    siparisler = {};
+    if (snap.exists()) snap.forEach(c => { siparisler[c.key] = { id: c.key, ...c.val() }; });
+    raporRender();
+  });
+}
+
+// ÜRÜNLER
+window.urunEkle = async function() {
+  const ad = document.getElementById('urun-ad').value.trim();
+  const fiyat = parseFloat(document.getElementById('urun-fiyat').value);
+  const kat = document.getElementById('urun-kat').value.trim() || 'Genel';
+  if (!ad || isNaN(fiyat) || fiyat < 0) { alert('Ürün adı ve geçerli bir fiyat girin!'); return; }
+  await push(ref(db, 'urunler'), { ad, fiyat, kategori: kat });
+  document.getElementById('urun-ad').value = '';
+  document.getElementById('urun-fiyat').value = '';
+  document.getElementById('urun-kat').value = '';
+};
+
+window.urunSil = async function(id) {
+  if (confirm('Bu ürünü silmek istiyor musunuz?')) {
+    await remove(ref(db, `urunler/${id}`));
+  }
+};
+
+function urunListeRender() {
+  const el = document.getElementById('urun-liste');
+  const items = Object.values(urunler);
+  if (items.length === 0) { el.innerHTML = '<div class="bos">Henüz ürün eklenmedi.</div>'; return; }
+  el.innerHTML = items.map(u => `
+    <div class="item-row">
+      <div class="item-info">
+        <div class="item-adi">${u.ad}</div>
+        <div class="item-alt"><span class="kat-badge">${u.kategori}</span></div>
+      </div>
+      <div class="item-fiyat">₺${u.fiyat}</div>
+      <button class="btn btn-danger" onclick="urunSil('${u.id}')">Sil</button>
+    </div>`).join('');
+}
+
+// MASALAR
+window.masaEkle = async function() {
+  const ad = document.getElementById('masa-ad').value.trim();
+  if (!ad) { alert('Masa adı girin!'); return; }
+  await push(ref(db, 'masalar'), { ad });
+  document.getElementById('masa-ad').value = '';
+};
+
+window.masaSil = async function(id) {
+  if (confirm('Bu masayı silmek istiyor musunuz?')) {
+    await remove(ref(db, `masalar/${id}`));
+  }
+};
+
+function masaListeRender() {
+  const el = document.getElementById('masa-liste');
+  const items = Object.values(masalar);
+  if (items.length === 0) { el.innerHTML = '<div class="bos">Henüz masa eklenmedi.</div>'; return; }
+  el.innerHTML = items.map(m => `
+    <div class="item-row">
+      <div class="item-info"><div class="item-adi">${m.ad}</div></div>
+      <button class="btn btn-danger" onclick="masaSil('${m.id}')">Sil</button>
+    </div>`).join('');
+}
+
+// RAPOR
+function raporRender() {
+  const all = Object.values(siparisler);
+  const tamamlanan = all.filter(s => s.durum === 'odendi');
+  const bekleyen = all.filter(s => ['bekliyor','hazirlaniyor','hazir','teslim'].includes(s.durum));
+  const ciro = tamamlanan.reduce((t, s) => t + (s.toplam || 0), 0);
+
+  document.getElementById('r-toplam-sip').textContent = all.length;
+  document.getElementById('r-ciro').textContent = `₺${ciro}`;
+  document.getElementById('r-bekleyen').textContent = bekleyen.length;
+  document.getElementById('r-tamamlanan').textContent = tamamlanan.length;
+
+  // En çok satan
+  const sayac = {};
+  tamamlanan.forEach(s => {
+    (s.urunler || []).forEach(u => {
+      if (!sayac[u.ad]) sayac[u.ad] = { adet: 0, ciro: 0 };
+      sayac[u.ad].adet += u.adet;
+      sayac[u.ad].ciro += u.fiyat * u.adet;
+    });
+  });
+  const sorted = Object.entries(sayac).sort((a, b) => b[1].adet - a[1].adet).slice(0, 10);
+  const liste = document.getElementById('r-urun-liste');
+  if (sorted.length === 0) { liste.innerHTML = '<div class="bos">Henüz satış yok.</div>'; return; }
+  liste.innerHTML = sorted.map(([ad, v], i) => `
+    <div class="item-row">
+      <div style="color:var(--muted);font-weight:700;min-width:24px;">${i+1}.</div>
+      <div class="item-info"><div class="item-adi">${ad}</div><div class="item-alt">${v.adet} adet satıldı</div></div>
+      <div class="item-fiyat">₺${v.ciro}</div>
+    </div>`).join('');
+}
+
+window.siparisleriSifirla = async function() {
+  if (confirm('TÜM siparişler silinecek! Emin misiniz?')) {
+    if (confirm('Son onay — bu işlem geri alınamaz.')) {
+      await set(ref(db, 'siparisler'), null);
+    }
+  }
+};
+
+window.sekmeAc = function(tabId, el) {
+  ['urun-tab', 'masa-tab', 'rapor-tab'].forEach(t => {
+    document.getElementById(t).style.display = t === tabId ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eryaman Etkinlik — Kasa</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0d;
+    --surface: #111a15;
+    --surface2: #1a2620;
+    --accent: #2ecc71;
+    --accent2: #27ae60;
+    --gold: #f0a500;
+    --red: #e74c3c;
+    --text: #e8f5ec;
+    --muted: #6b8f76;
+    --border: #1e3028;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+  .header {
+    background: var(--surface); border-bottom: 2px solid var(--accent);
+    padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--accent); letter-spacing: 3px; }
+
+  .nav-links { display: flex; gap: 1rem; padding: 0.75rem 1.5rem; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .nav-links a { color: var(--muted); font-size: 0.82rem; text-decoration: none; }
+
+  .ozet-bar {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .ozet-item { padding: 0.75rem 1rem; border-right: 1px solid var(--border); }
+  .ozet-item:last-child { border-right: none; }
+  .ozet-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .ozet-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent); }
+
+  .content { padding: 1rem; }
+
+  .bos-ekran { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+  .bos-ekran .icon { font-size: 3rem; margin-bottom: 1rem; }
+
+  .siparis-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 0.75rem; overflow: hidden;
+  }
+  .siparis-card.hazir { border-color: var(--accent); }
+
+  .siparis-top {
+    padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2);
+  }
+  .siparis-masa { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--gold); letter-spacing: 1px; }
+  .siparis-garson { font-size: 0.8rem; color: var(--muted); }
+  .durum-badge {
+    padding: 0.2rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+  }
+  .badge-hazir { background: rgba(46,204,113,0.2); color: var(--accent); }
+  .badge-bekliyor { background: rgba(240,165,0,0.15); color: var(--gold); }
+
+  .siparis-body { padding: 0.75rem 1rem; }
+  .urun-satir {
+    display: flex; align-items: center; gap: 0.75rem; padding: 0.35rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .urun-satir:last-child { border-bottom: none; }
+  .urun-adet {
+    background: var(--surface2); color: var(--text); border-radius: 6px;
+    padding: 0.1rem 0.5rem; font-weight: 700; font-size: 0.82rem; min-width: 28px; text-align: center;
+  }
+  .urun-ad { flex: 1; font-size: 0.9rem; }
+  .urun-tutar { color: var(--accent); font-weight: 700; font-size: 0.85rem; }
+
+  .siparis-footer {
+    padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--border);
+  }
+  .toplam-text { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--gold); }
+
+  .btn {
+    padding: 0.75rem 1.25rem; border: none; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn:active { opacity: 0.8; }
+  .btn-odendi { background: var(--accent); color: #000; }
+  .btn-odendi:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+  .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .tab {
+    flex: 1; padding: 0.8rem; text-align: center; font-size: 0.85rem; font-weight: 600;
+    color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">💰 KASA</div>
+    <div style="font-size:0.8rem;color:var(--muted)" id="header-sub">Bağlanıyor...</div>
+  </div>
+</div>
+
+<div class="nav-links">
+  <a href="index.html">📱 Garson</a>
+  <a href="mutfak.html">🍳 Mutfak</a>
+  <a href="yonetici.html">⚙️ Yönetici</a>
+</div>
+
+<div class="ozet-bar">
+  <div class="ozet-item">
+    <div class="ozet-label">Bekleyen</div>
+    <div class="ozet-val" id="oz-bekleyen">0</div>
+  </div>
+  <div class="ozet-item">
+    <div class="ozet-label">Hazır</div>
+    <div class="ozet-val" id="oz-hazir">0</div>
+  </div>
+  <div class="ozet-item">
+    <div class="ozet-label">Günlük Ciro</div>
+    <div class="ozet-val" id="oz-ciro">₺0</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="sekmeAc('hazir-tab', this)">✅ Hazır</div>
+  <div class="tab" onclick="sekmeAc('bekliyor-tab', this)">⏳ Bekliyor</div>
+  <div class="tab" onclick="sekmeAc('gecmis-tab', this)">📋 Geçmiş</div>
+</div>
+
+<div class="content" id="content">
+  <div id="hazir-tab"></div>
+  <div id="bekliyor-tab" style="display:none;"></div>
+  <div id="gecmis-tab" style="display:none;"></div>
+</div>
+
+<script type="module">
+import { db } from './firebase-config.js';
+import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+let siparisler = {};
+let aktifTab = 'hazir-tab';
+
+onValue(ref(db, 'siparisler'), snap => {
+  siparisler = {};
+  if (snap.exists()) {
+    snap.forEach(c => { siparisler[c.key] = { id: c.key, ...c.val() }; });
+  }
+  render();
+});
+
+function render() {
+  const all = Object.values(siparisler);
+
+  const hazirlar = all.filter(s => s.durum === 'hazir' || s.durum === 'teslim');
+  const bekleyenler = all.filter(s => s.durum === 'bekliyor' || s.durum === 'hazirlaniyor');
+  const gecmis = all.filter(s => s.durum === 'odendi');
+
+  document.getElementById('oz-bekleyen').textContent = bekleyenler.length;
+  document.getElementById('oz-hazir').textContent = hazirlar.filter(s => s.durum === 'hazir' || s.durum === 'teslim').length;
+  const ciro = gecmis.reduce((t, s) => t + (s.toplam || 0), 0);
+  document.getElementById('oz-ciro').textContent = `₺${ciro}`;
+  document.getElementById('header-sub').textContent = `${hazirlar.filter(s=>s.durum==='hazir').length} ödeme bekliyor`;
+
+  renderTab('hazir-tab', hazirlar.sort((a,b)=>(b.zaman||0)-(a.zaman||0)));
+  renderTab('bekliyor-tab', bekleyenler.sort((a,b)=>(a.zaman||0)-(b.zaman||0)));
+  renderTab('gecmis-tab', gecmis.sort((a,b)=>(b.zaman||0)-(a.zaman||0)));
+}
+
+function renderTab(tabId, items) {
+  const el = document.getElementById(tabId);
+  if (items.length === 0) {
+    el.innerHTML = '<div class="bos-ekran"><div class="icon">🎉</div><p>Gösterilecek sipariş yok.</p></div>';
+    return;
+  }
+  el.innerHTML = items.map(s => {
+    const isHazir = s.durum === 'hazir' || s.durum === 'teslim';
+    const isOdendi = s.durum === 'odendi';
+    const durumBadge = isOdendi
+      ? `<span class="durum-badge" style="background:rgba(46,204,113,0.1);color:#2ecc71">✓ Ödendi</span>`
+      : isHazir
+        ? `<span class="durum-badge badge-hazir">✅ Hazır</span>`
+        : `<span class="durum-badge badge-bekliyor">⏳ ${s.durum === 'hazirlaniyor' ? 'Hazırlanıyor' : 'Bekliyor'}</span>`;
+
+    return `<div class="siparis-card ${isHazir ? 'hazir' : ''}">
+      <div class="siparis-top">
+        <div>
+          <div class="siparis-masa">${s.masaAd}</div>
+          <div class="siparis-garson">👤 ${s.garson}</div>
+        </div>
+        ${durumBadge}
+      </div>
+      <div class="siparis-body">
+        ${s.urunler.map(u => `<div class="urun-satir">
+          <span class="urun-adet">${u.adet}</span>
+          <span class="urun-ad">${u.ad}</span>
+          <span class="urun-tutar">₺${u.fiyat * u.adet}</span>
+        </div>`).join('')}
+        ${s.not ? `<div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem;">📝 ${s.not}</div>` : ''}
+      </div>
+      <div class="siparis-footer">
+        <div class="toplam-text">₺${s.toplam}</div>
+        ${!isOdendi && tabId !== 'bekliyor-tab'
+          ? `<button class="btn btn-odendi" onclick="odemeAl('${s.id}')">💵 Ödeme Alındı</button>`
+          : isOdendi ? '' : `<span style="font-size:0.8rem;color:var(--muted)">Mutfak hazırlıyor...</span>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.odemeAl = async function(id) {
+  if (confirm('Ödeme alındı ve sipariş kapatılsın mı?')) {
+    await update(ref(db, `siparisler/${id}`), { durum: 'odendi' });
+  }
+};
+
+window.sekmeAc = function(tabId, el) {
+  ['hazir-tab', 'bekliyor-tab', 'gecmis-tab'].forEach(t => {
+    document.getElementById(t).style.display = t === tabId ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  aktifTab = tabId;
+};
+</script>
+</body>
+</html>
