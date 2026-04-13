@@ -138,19 +138,19 @@
       <div class="pin-dot" id="d3"></div>
     </div>
     <div id="pin-hata" class="pin-hata" style="display:none;">Yanlış PIN!</div>
-    <div class="pin-grid">
-      <div class="pin-btn" onclick="pinGir('1')">1</div>
-      <div class="pin-btn" onclick="pinGir('2')">2</div>
-      <div class="pin-btn" onclick="pinGir('3')">3</div>
-      <div class="pin-btn" onclick="pinGir('4')">4</div>
-      <div class="pin-btn" onclick="pinGir('5')">5</div>
-      <div class="pin-btn" onclick="pinGir('6')">6</div>
-      <div class="pin-btn" onclick="pinGir('7')">7</div>
-      <div class="pin-btn" onclick="pinGir('8')">8</div>
-      <div class="pin-btn" onclick="pinGir('9')">9</div>
-      <div class="pin-btn sil" onclick="pinSil()">⌫</div>
-      <div class="pin-btn" onclick="pinGir('0')">0</div>
-      <div class="pin-btn" style="opacity:0" disabled></div>
+    <div class="pin-grid" id="pin-grid">
+      <div class="pin-btn" data-sayi="1">1</div>
+      <div class="pin-btn" data-sayi="2">2</div>
+      <div class="pin-btn" data-sayi="3">3</div>
+      <div class="pin-btn" data-sayi="4">4</div>
+      <div class="pin-btn" data-sayi="5">5</div>
+      <div class="pin-btn" data-sayi="6">6</div>
+      <div class="pin-btn" data-sayi="7">7</div>
+      <div class="pin-btn" data-sayi="8">8</div>
+      <div class="pin-btn" data-sayi="9">9</div>
+      <div class="pin-btn sil" data-sayi="sil">⌫</div>
+      <div class="pin-btn" data-sayi="0">0</div>
+      <div class="pin-btn" style="opacity:0;pointer-events:none;"></div>
     </div>
   </div>
   <div style="display:flex;gap:1.5rem;margin-top:1rem;">
@@ -169,10 +169,10 @@
     <a href="kasa.html">💰 Kasa</a>
   </div>
   <div class="tabs">
-    <div class="tab active" onclick="sekmeAc('urun-tab', this)">🍽️ Ürünler</div>
-    <div class="tab" onclick="sekmeAc('masa-tab', this)">🪑 Masalar</div>
-    <div class="tab" onclick="sekmeAc('garson-tab', this)">👤 Garsonlar</div>
-    <div class="tab" onclick="sekmeAc('rapor-tab', this)">📊 Rapor</div>
+    <div class="tab active" data-tab="urun-tab">🍽️ Ürünler</div>
+    <div class="tab" data-tab="masa-tab">🪑 Masalar</div>
+    <div class="tab" data-tab="garson-tab">👤 Garsonlar</div>
+    <div class="tab" data-tab="rapor-tab">📊 Rapor</div>
   </div>
 
   <!-- ÜRÜNLER -->
@@ -193,7 +193,7 @@
           <input type="text" id="urun-kat" placeholder="İçecek, Tatlı...">
         </div>
       </div>
-      <button class="btn btn-primary" onclick="urunEkle()">Ekle</button>
+      <button class="btn btn-primary" id="urun-ekle-btn">Ekle</button>
     </div>
     <div class="liste-title">Mevcut Ürünler</div>
     <div id="urun-liste"></div>
@@ -207,7 +207,7 @@
         <div class="form-label">Masa Adı</div>
         <input type="text" id="masa-ad" placeholder="Örn: A1, Teras 3...">
       </div>
-      <button class="btn btn-primary" onclick="masaEkle()">Ekle</button>
+      <button class="btn btn-primary" id="masa-ekle-btn">Ekle</button>
     </div>
     <div class="liste-title">Mevcut Masalar</div>
     <div id="masa-liste"></div>
@@ -218,7 +218,7 @@
     <div class="liste-title">Giriş Yapmış Garsonlar</div>
     <div id="garson-liste"></div>
     <br>
-    <button class="btn btn-danger" style="width:100%" onclick="garsonListesiSifirla()">🗑️ Garson Listesini Temizle</button>
+    <button class="btn btn-danger" style="width:100%" id="garson-sifirla-btn">🗑️ Garson Listesini Temizle</button>
   </div>
 
   <!-- RAPOR -->
@@ -244,8 +244,8 @@
     <div class="liste-title">En Çok Satan Ürünler</div>
     <div id="r-urun-liste"></div>
     <br>
-    <button class="btn btn-primary" style="width:100%;margin-bottom:0.75rem;background:#2ecc71;color:#000;" onclick="csvIndir()">📥 Siparişleri CSV Olarak İndir</button>
-    <button class="btn btn-danger" style="width:100%" onclick="siparisleriSifirla()">🗑️ Tüm Siparişleri Sıfırla</button>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:0.75rem;background:#2ecc71;color:#000;" id="csv-btn">📥 Siparişleri CSV Olarak İndir</button>
+    <button class="btn btn-danger" style="width:100%" id="sifirla-btn">🗑️ Tüm Siparişleri Sıfırla</button>
   </div>
 </div>
 
@@ -259,37 +259,58 @@ let urunler = {};
 let masalar = {};
 let siparisler = {};
 
-// PIN
-window.pinGir = function(d) {
-  if (pinGirilen.length >= 4) return;
-  pinGirilen += d;
-  pinGuncelle();
-  if (pinGirilen.length === 4) {
-    if (pinGirilen === PIN) {
-      document.getElementById('pin-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'flex';
-      baslat();
-    } else {
-      document.getElementById('pin-hata').style.display = 'block';
-      setTimeout(() => {
-        pinGirilen = '';
-        pinGuncelle();
-        document.getElementById('pin-hata').style.display = 'none';
-      }, 800);
+// PIN buton event listener'ları
+document.getElementById('pin-grid').addEventListener('click', e => {
+  const btn = e.target.closest('.pin-btn');
+  if (!btn) return;
+  const sayi = btn.dataset.sayi;
+  if (sayi === 'sil') {
+    pinGirilen = pinGirilen.slice(0, -1);
+    pinGuncelle();
+  } else if (sayi && pinGirilen.length < 4) {
+    pinGirilen += sayi;
+    pinGuncelle();
+    if (pinGirilen.length === 4) {
+      if (pinGirilen === PIN) {
+        document.getElementById('pin-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'flex';
+        baslat();
+      } else {
+        document.getElementById('pin-hata').style.display = 'block';
+        setTimeout(() => {
+          pinGirilen = '';
+          pinGuncelle();
+          document.getElementById('pin-hata').style.display = 'none';
+        }, 800);
+      }
     }
   }
-};
-
-window.pinSil = function() {
-  pinGirilen = pinGirilen.slice(0, -1);
-  pinGuncelle();
-};
+});
 
 function pinGuncelle() {
   for (let i = 0; i < 4; i++) {
     document.getElementById(`d${i}`).classList.toggle('filled', i < pinGirilen.length);
   }
 }
+
+// Buton event listener'ları
+document.getElementById('urun-ekle-btn').addEventListener('click', urunEkle);
+document.getElementById('masa-ekle-btn').addEventListener('click', masaEkle);
+document.getElementById('csv-btn').addEventListener('click', csvIndir);
+document.getElementById('garson-sifirla-btn').addEventListener('click', garsonListesiSifirla);
+document.getElementById('sifirla-btn').addEventListener('click', siparisleriSifirla);
+
+// Tab event listener'ları
+document.querySelectorAll('.tab[data-tab]').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const tabId = tab.dataset.tab;
+    ['urun-tab','masa-tab','garson-tab','rapor-tab'].forEach(t => {
+      document.getElementById(t).style.display = t === tabId ? 'block' : 'none';
+    });
+    document.querySelectorAll('.tab[data-tab]').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});
 
 function baslat() {
   onValue(ref(db, 'urunler'), snap => {
@@ -328,8 +349,17 @@ function baslat() {
   });
 }
 
-// ÜRÜNLER
-window.urunEkle = async function() {
+// Dinamik sil butonları için event delegation
+document.getElementById('urun-liste').addEventListener('click', e => {
+  const btn = e.target.closest('[data-sil-urun]');
+  if (btn && confirm('Bu ürünü silmek istiyor musunuz?')) remove(ref(db, 'urunler/' + btn.dataset.silUrun));
+});
+document.getElementById('masa-liste').addEventListener('click', e => {
+  const btn = e.target.closest('[data-sil-masa]');
+  if (btn && confirm('Bu masayı silmek istiyor musunuz?')) remove(ref(db, 'masalar/' + btn.dataset.silMasa));
+});
+
+async function urunEkle() {
   const ad = document.getElementById('urun-ad').value.trim();
   const fiyat = parseFloat(document.getElementById('urun-fiyat').value);
   const kat = document.getElementById('urun-kat').value.trim() || 'Genel';
@@ -338,13 +368,14 @@ window.urunEkle = async function() {
   document.getElementById('urun-ad').value = '';
   document.getElementById('urun-fiyat').value = '';
   document.getElementById('urun-kat').value = '';
-};
+}
 
-window.urunSil = async function(id) {
-  if (confirm('Bu ürünü silmek istiyor musunuz?')) {
-    await remove(ref(db, `urunler/${id}`));
-  }
-};
+async function masaEkle() {
+  const ad = document.getElementById('masa-ad').value.trim();
+  if (!ad) { alert('Masa adı girin!'); return; }
+  await push(ref(db, 'masalar'), { ad });
+  document.getElementById('masa-ad').value = '';
+}
 
 function urunListeRender() {
   const el = document.getElementById('urun-liste');
@@ -357,23 +388,9 @@ function urunListeRender() {
         <div class="item-alt"><span class="kat-badge">${u.kategori}</span></div>
       </div>
       <div class="item-fiyat">₺${u.fiyat}</div>
-      <button class="btn btn-danger" onclick="urunSil('${u.id}')">Sil</button>
+      <button class="btn btn-danger" data-sil-urun="${u.id}">Sil</button>
     </div>`).join('');
 }
-
-// MASALAR
-window.masaEkle = async function() {
-  const ad = document.getElementById('masa-ad').value.trim();
-  if (!ad) { alert('Masa adı girin!'); return; }
-  await push(ref(db, 'masalar'), { ad });
-  document.getElementById('masa-ad').value = '';
-};
-
-window.masaSil = async function(id) {
-  if (confirm('Bu masayı silmek istiyor musunuz?')) {
-    await remove(ref(db, `masalar/${id}`));
-  }
-};
 
 function masaListeRender() {
   const el = document.getElementById('masa-liste');
@@ -382,7 +399,7 @@ function masaListeRender() {
   el.innerHTML = items.map(m => `
     <div class="item-row">
       <div class="item-info"><div class="item-adi">${m.ad}</div></div>
-      <button class="btn btn-danger" onclick="masaSil('${m.id}')">Sil</button>
+      <button class="btn btn-danger" data-sil-masa="${m.id}">Sil</button>
     </div>`).join('');
 }
 
@@ -418,58 +435,42 @@ function raporRender() {
     </div>`).join('');
 }
 
-window.csvIndir = function() {
+function csvIndir() {
   const all = Object.values(siparisler);
   if (all.length === 0) { alert('Henüz sipariş yok!'); return; }
-
-  const satirlar = [
-    ['Tarih', 'Saat', 'Garson', 'Masa', 'Ürünler', 'Not', 'Toplam (₺)', 'Durum']
-  ];
-
+  const satirlar = [['Tarih', 'Saat', 'Garson', 'Masa', 'Ürünler', 'Not', 'Toplam (₺)', 'Durum']];
   all.sort((a, b) => (a.zaman || 0) - (b.zaman || 0)).forEach(s => {
     const tarih = s.zaman ? new Date(s.zaman) : null;
     const tarihStr = tarih ? tarih.toLocaleDateString('tr-TR') : '-';
     const saatStr = tarih ? tarih.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '-';
-    const urunStr = (s.urunler || []).map(u => `${u.adet}x ${u.ad}`).join(' | ');
+    const urunStr = (s.urunler || []).map(u => u.adet + 'x ' + u.ad).join(' | ');
     const durumlar = { bekliyor: 'Bekliyor', hazirlaniyor: 'Hazırlanıyor', hazir: 'Hazır', teslim: 'Teslim Edildi', odendi: 'Ödendi', iptal: 'İptal' };
-    satirlar.push([
-      tarihStr, saatStr, s.garson || '-', s.masaAd || '-',
-      urunStr, s.not || '', s.toplam || 0, durumlar[s.durum] || s.durum
-    ]);
+    satirlar.push([tarihStr, saatStr, s.garson || '-', s.masaAd || '-', urunStr, s.not || '', s.toplam || 0, durumlar[s.durum] || s.durum]);
   });
-
-  const bom = '\uFEFF'; // Excel Türkçe karakter desteği için
+  const bom = '\uFEFF';
   const icerik = bom + satirlar.map(r => r.map(h => '"' + String(h).replace(/"/g, '""') + '"').join(';')).join('\n');
   const blob = new Blob([icerik], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `kermes-siparisler-${new Date().toLocaleDateString('tr-TR').replace(/\./g, '-')}.csv`;
+  a.download = 'kermes-siparisler-' + new Date().toLocaleDateString('tr-TR').replace(/\./g, '-') + '.csv';
   a.click();
   URL.revokeObjectURL(url);
-};
+}
 
-window.siparisleriSifirla = async function() {
+async function siparisleriSifirla() {
   if (confirm('TÜM siparişler silinecek! Emin misiniz?')) {
     if (confirm('Son onay — bu işlem geri alınamaz.')) {
       await set(ref(db, 'siparisler'), null);
     }
   }
-};
+}
 
-window.garsonListesiSifirla = async function() {
+async function garsonListesiSifirla() {
   if (confirm('Tüm garson listesi silinecek. Emin misiniz?')) {
     await set(ref(db, 'garsonlar'), null);
   }
-};
-
-window.sekmeAc = function(tabId, el) {
-  ['urun-tab', 'masa-tab', 'garson-tab', 'rapor-tab'].forEach(t => {
-    document.getElementById(t).style.display = t === tabId ? 'block' : 'none';
-  });
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-};
+}
 </script>
 </body>
 </html>
