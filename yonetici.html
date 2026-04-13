@@ -171,6 +171,7 @@
   <div class="tabs">
     <div class="tab active" onclick="sekmeAc('urun-tab', this)">🍽️ Ürünler</div>
     <div class="tab" onclick="sekmeAc('masa-tab', this)">🪑 Masalar</div>
+    <div class="tab" onclick="sekmeAc('garson-tab', this)">👤 Garsonlar</div>
     <div class="tab" onclick="sekmeAc('rapor-tab', this)">📊 Rapor</div>
   </div>
 
@@ -210,6 +211,14 @@
     </div>
     <div class="liste-title">Mevcut Masalar</div>
     <div id="masa-liste"></div>
+  </div>
+
+  <!-- GARSONLAR -->
+  <div id="garson-tab" class="content" style="display:none;">
+    <div class="liste-title">Giriş Yapmış Garsonlar</div>
+    <div id="garson-liste"></div>
+    <br>
+    <button class="btn btn-danger" style="width:100%" onclick="garsonListesiSifirla()">🗑️ Garson Listesini Temizle</button>
   </div>
 
   <!-- RAPOR -->
@@ -295,7 +304,24 @@ function baslat() {
     masaListeRender();
   });
 
-  onValue(ref(db, 'siparisler'), snap => {
+  onValue(ref(db, 'garsonlar'), snap => {
+    const liste = document.getElementById('garson-liste');
+    if (!snap.exists()) {
+      liste.innerHTML = '<div class="bos">Henüz giriş yapan garson yok.</div>';
+      return;
+    }
+    const garsonlar = [];
+    snap.forEach(c => garsonlar.push(c.val()));
+    garsonlar.sort((a, b) => (a.giris || 0) - (b.giris || 0));
+    liste.innerHTML = garsonlar.map((g, i) => `
+      <div class="item-row">
+        <div style="color:var(--muted);font-weight:700;min-width:24px;">${i + 1}.</div>
+        <div class="item-info">
+          <div class="item-adi">👤 ${g.ad}</div>
+          <div class="item-alt">${g.giris ? new Date(g.giris).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) + ' giris yaptı' : ''}</div>
+        </div>
+      </div>`).join('');
+  });
     siparisler = {};
     if (snap.exists()) snap.forEach(c => { siparisler[c.key] = { id: c.key, ...c.val() }; });
     raporRender();
@@ -413,7 +439,7 @@ window.csvIndir = function() {
   });
 
   const bom = '\uFEFF'; // Excel Türkçe karakter desteği için
-  const icerik = bom + satirlar.map(r => r.map(h => `"${String(h).replace(/"/g, '""')}"`).join(';')).join('\n');
+  const icerik = bom + satirlar.map(r => r.map(h => '"' + String(h).replace(/"/g, '""') + '"').join(';')).join('\n');
   const blob = new Blob([icerik], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -431,8 +457,14 @@ window.siparisleriSifirla = async function() {
   }
 };
 
+window.garsonListesiSifirla = async function() {
+  if (confirm('Tüm garson listesi silinecek. Emin misiniz?')) {
+    await set(ref(db, 'garsonlar'), null);
+  }
+};
+
 window.sekmeAc = function(tabId, el) {
-  ['urun-tab', 'masa-tab', 'rapor-tab'].forEach(t => {
+  ['urun-tab', 'masa-tab', 'garson-tab', 'rapor-tab'].forEach(t => {
     document.getElementById(t).style.display = t === tabId ? 'block' : 'none';
   });
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
