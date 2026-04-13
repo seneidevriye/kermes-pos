@@ -272,7 +272,7 @@
 
 <script type="module">
 import { db } from './firebase-config.js';
-import { ref, push, onValue, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { ref, push, onValue, update, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 let garsonAdi = '';
 let masalar = [];
@@ -289,6 +289,8 @@ let bildirimAktif = false;
 const kayitliAd = localStorage.getItem('kermes_garson');
 if (kayitliAd) {
   garsonAdi = kayitliAd;
+  const temizAd = kayitliAd.replace(/[.#$/[\]]/g, '_');
+  set(ref(db, `garsonlar/${temizAd}`), { ad: kayitliAd, giris: Date.now() });
   document.getElementById('garson-adi-badge').textContent = kayitliAd;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
@@ -300,6 +302,9 @@ window.girisYap = function() {
   if (!ad) { alert('Lütfen adınızı girin!'); return; }
   garsonAdi = ad;
   localStorage.setItem('kermes_garson', ad);
+  // Firebase'e kaydet (aynı isim tekrar yazılmasın diye isim key olarak kullan)
+  const temizAd = ad.replace(/[.#$/[\]]/g, '_');
+  set(ref(db, `garsonlar/${temizAd}`), { ad, giris: Date.now() });
   document.getElementById('garson-adi-badge').textContent = ad;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
