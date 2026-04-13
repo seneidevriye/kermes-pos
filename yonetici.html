@@ -235,6 +235,7 @@
     <div class="liste-title">En Çok Satan Ürünler</div>
     <div id="r-urun-liste"></div>
     <br>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:0.75rem;background:#2ecc71;color:#000;" onclick="csvIndir()">📥 Siparişleri CSV Olarak İndir</button>
     <button class="btn btn-danger" style="width:100%" onclick="siparisleriSifirla()">🗑️ Tüm Siparişleri Sıfırla</button>
   </div>
 </div>
@@ -390,6 +391,37 @@ function raporRender() {
       <div class="item-fiyat">₺${v.ciro}</div>
     </div>`).join('');
 }
+
+window.csvIndir = function() {
+  const all = Object.values(siparisler);
+  if (all.length === 0) { alert('Henüz sipariş yok!'); return; }
+
+  const satirlar = [
+    ['Tarih', 'Saat', 'Garson', 'Masa', 'Ürünler', 'Not', 'Toplam (₺)', 'Durum']
+  ];
+
+  all.sort((a, b) => (a.zaman || 0) - (b.zaman || 0)).forEach(s => {
+    const tarih = s.zaman ? new Date(s.zaman) : null;
+    const tarihStr = tarih ? tarih.toLocaleDateString('tr-TR') : '-';
+    const saatStr = tarih ? tarih.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '-';
+    const urunStr = (s.urunler || []).map(u => `${u.adet}x ${u.ad}`).join(' | ');
+    const durumlar = { bekliyor: 'Bekliyor', hazirlaniyor: 'Hazırlanıyor', hazir: 'Hazır', teslim: 'Teslim Edildi', odendi: 'Ödendi', iptal: 'İptal' };
+    satirlar.push([
+      tarihStr, saatStr, s.garson || '-', s.masaAd || '-',
+      urunStr, s.not || '', s.toplam || 0, durumlar[s.durum] || s.durum
+    ]);
+  });
+
+  const bom = '\uFEFF'; // Excel Türkçe karakter desteği için
+  const icerik = bom + satirlar.map(r => r.map(h => `"${String(h).replace(/"/g, '""')}"`).join(';')).join('\n');
+  const blob = new Blob([icerik], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `kermes-siparisler-${new Date().toLocaleDateString('tr-TR').replace(/\./g, '-')}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
 
 window.siparisleriSifirla = async function() {
   if (confirm('TÜM siparişler silinecek! Emin misiniz?')) {
