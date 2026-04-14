@@ -191,7 +191,7 @@ let masalar = [];
 let urunler = [];
 let sepet = {};
 let seciliMasa = null;
-let aktifKategori = 'Tumu';
+let aktifKategori = 'Hepsi';
 let aktifFiltre = 'hepsi';
 let siparislerim = {};
 let bildirimGosterilenler = new Set();
@@ -223,9 +223,8 @@ function kategoriNormalize(k) {
 }
 
 let baslatildi = false;
-
-// Firebase garsonları dinle
-onValue(ref(db, 'garsonlar'), snap => {
+const garsonlarRef = ref(db, 'garsonlar');
+onValue(garsonlarRef, snap => {
   garsonlarCache = {};
   if (snap.exists()) snap.forEach(c => { garsonlarCache[c.key] = { id: c.key, ...c.val() }; });
   const kayitliKey = localStorage.getItem('kermes_garson_key');
@@ -324,8 +323,8 @@ function baslat() {
   onValue(ref(db, 'urunler'), snap => {
     urunler = [];
     if (snap.exists()) snap.forEach(c => urunler.push({ id: c.key, ...c.val() }));
-    console.log('URUNLER:', urunler.map(u => ({ ad: u.ad, kategori: u.kategori, len: (u.kategori||'').length, codes: [...(u.kategori||'')].map(c => c.charCodeAt(0)) })));
-    aktifKategori = 'Tumu';
+    console.log('URUNLER SAYI:', urunler.length, urunler.map(u => u.ad));
+    aktifKategori = 'Hepsi';
     kategoriRender();
     urunGridRender();
   });
@@ -369,15 +368,12 @@ document.getElementById('masa-grid').addEventListener('click', e => {
 });
 
 function kategoriRender() {
-  // Benzersiz kategorileri Firebase'den al, normalize ederek karsilastir
   const ham = [...new Set(urunler.map(u => (u.kategori || '').trim()).filter(Boolean))];
-  // 'Tumu' her zaman ilk
-  const kategoriler = ['Tumu', ...ham];
+  const kategoriler = ['Hepsi', ...ham];
   const scroll = document.getElementById('kat-scroll');
-  scroll.innerHTML = kategoriler.map(k => {
-    const label = k === 'Tumu' ? 'Tumusu' : k;
-    return '<div class="kat-chip' + (aktifKategori === k ? ' active' : '') + '" data-kat="' + k + '">' + label + '</div>';
-  }).join('');
+  scroll.innerHTML = kategoriler.map(k =>
+    '<div class="kat-chip' + (aktifKategori === k ? ' active' : '') + '" data-kat="' + k + '">' + k + '</div>'
+  ).join('');
 }
 
 document.getElementById('kat-scroll').addEventListener('click', e => {
@@ -390,7 +386,7 @@ document.getElementById('kat-scroll').addEventListener('click', e => {
 });
 
 function urunGridRender() {
-  const filtered = aktifKategori === 'Tumu'
+  const filtered = aktifKategori === 'Hepsi'
     ? urunler
     : urunler.filter(u => (u.kategori || '').trim() === aktifKategori);
 
