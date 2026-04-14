@@ -178,18 +178,21 @@ let aktifTab = 'hazir-tab';
 let garsonlarCache = {};
 let kasaAdi = '';
 
-// Garsonları yükle, localStorage kontrolü yap
+let garsonlarYuklendi = false;
 onValue(ref(db, 'garsonlar'), snap => {
   garsonlarCache = {};
   if (snap.exists()) snap.forEach(c => { garsonlarCache[c.key] = { id: c.key, ...c.val() }; });
 
-  const kayitliKey = localStorage.getItem('kermes_kasa_key');
-  if (kayitliKey && garsonlarCache[kayitliKey]?.kasa && !kasaAdi) {
-    kasaAdi = garsonlarCache[kayitliKey].ad;
-    document.getElementById('kasa-adi-badge').textContent = kasaAdi;
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    baslat();
+  if (!garsonlarYuklendi) {
+    garsonlarYuklendi = true;
+    const kayitliKey = localStorage.getItem('kermes_kasa_key');
+    if (kayitliKey && garsonlarCache[kayitliKey]?.kasa && !kasaAdi) {
+      kasaAdi = garsonlarCache[kayitliKey].ad;
+      document.getElementById('kasa-adi-badge').textContent = kasaAdi;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      baslat();
+    }
   }
 });
 
@@ -202,6 +205,7 @@ function girisYap() {
   const kullanici = document.getElementById('kasa-kullanici').value.trim();
   const sifre = document.getElementById('kasa-sifre').value.trim();
   if (!kullanici || !sifre) { document.getElementById('login-hata').textContent = 'Kullanıcı adı ve şifre girin!'; return; }
+  if (!garsonlarYuklendi) { document.getElementById('login-hata').textContent = 'Bağlanıyor, lütfen bekleyin...'; return; }
   const bulunan = Object.values(garsonlarCache).find(g => g.ad === kullanici && g.sifre === sifre);
   if (!bulunan) {
     document.getElementById('login-hata').textContent = 'Kullanıcı adı veya şifre yanlış!';
