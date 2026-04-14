@@ -222,6 +222,8 @@ function kategoriNormalize(k) {
     .replace(/ /g, '');
 }
 
+let baslatildi = false;
+
 // Firebase garsonları dinle
 onValue(ref(db, 'garsonlar'), snap => {
   garsonlarCache = {};
@@ -234,7 +236,7 @@ onValue(ref(db, 'garsonlar'), snap => {
     document.getElementById('garson-adi-badge').textContent = g.ad;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
-    baslat();
+    if (!baslatildi) { baslatildi = true; baslat(); }
   }
 });
 
@@ -257,7 +259,7 @@ window.girisYap = function() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   hataEl.textContent = '';
-  baslat();
+  if (!baslatildi) { baslatildi = true; baslat(); }
 };
 
 window.cikisYap = function() {
