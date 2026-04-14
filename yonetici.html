@@ -57,6 +57,7 @@
   .item-alt { font-size: 0.78rem; color: var(--muted); margin-top: 0.1rem; }
   .item-fiyat { color: var(--gold); font-weight: 700; font-size: 0.9rem; }
   .kat-badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 0.1rem 0.5rem; font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+  .sifre-badge { background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3); border-radius: 6px; padding: 0.1rem 0.5rem; font-size: 0.72rem; color: var(--accent); font-weight: 700; letter-spacing: 1px; }
   .bos { text-align: center; color: var(--muted); padding: 2rem; font-size: 0.9rem; }
   .rapor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
   .rapor-kart { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; }
@@ -130,11 +131,18 @@
     <div id="masa-liste"></div>
   </div>
 
+  <!-- GARSONLAR -->
   <div id="garson-tab" class="content" style="display:none;">
-    <div class="liste-title">Giriş Yapmış Garsonlar</div>
+    <div class="add-card">
+      <div class="add-card-title">Yeni Garson Ekle</div>
+      <div class="form-row">
+        <div class="form-group"><div class="form-label">Ad Soyad</div><input type="text" id="garson-ad" placeholder="Ahmet"></div>
+        <div class="form-group"><div class="form-label">Şifre</div><input type="text" id="garson-sifre" placeholder="1234" maxlength="20"></div>
+      </div>
+      <button class="btn btn-primary" id="btn-garson-ekle">Ekle</button>
+    </div>
+    <div class="liste-title">Kayıtlı Garsonlar</div>
     <div id="garson-liste"></div>
-    <br>
-    <button class="btn btn-danger" style="width:100%" id="btn-garson-sifirla">🗑️ Garson Listesini Temizle</button>
   </div>
 
   <div id="rapor-tab" class="content" style="display:none;">
@@ -180,7 +188,7 @@ document.querySelectorAll('.pin-btn').forEach(btn => {
         document.getElementById('app').style.display = 'flex';
         baslat();
       } else {
-        document.getElementById('pin-hata').textContent = 'Yanlis PIN!';
+        document.getElementById('pin-hata').textContent = 'Yanlış PIN!';
         setTimeout(() => {
           pinGirilen = '';
           for (let i = 0; i < 4; i++) document.getElementById('d' + i).classList.remove('filled');
@@ -205,18 +213,22 @@ document.querySelectorAll('.tab').forEach(tab => {
 // Statik butonlar
 document.getElementById('btn-urun-ekle').addEventListener('click', urunEkle);
 document.getElementById('btn-masa-ekle').addEventListener('click', masaEkle);
+document.getElementById('btn-garson-ekle').addEventListener('click', garsonEkle);
 document.getElementById('btn-csv').addEventListener('click', csvIndir);
 document.getElementById('btn-sifirla').addEventListener('click', siparisleriSifirla);
-document.getElementById('btn-garson-sifirla').addEventListener('click', garsonListesiSifirla);
 
 // Dinamik sil butonları
 document.getElementById('urun-liste').addEventListener('click', e => {
   const id = e.target.dataset.silId;
-  if (id && confirm('Bu urunu silmek istiyor musunuz?')) remove(ref(db, 'urunler/' + id));
+  if (id && confirm('Bu ürünü silmek istiyor musunuz?')) remove(ref(db, 'urunler/' + id));
 });
 document.getElementById('masa-liste').addEventListener('click', e => {
   const id = e.target.dataset.silId;
-  if (id && confirm('Bu masayi silmek istiyor musunuz?')) remove(ref(db, 'masalar/' + id));
+  if (id && confirm('Bu masayı silmek istiyor musunuz?')) remove(ref(db, 'masalar/' + id));
+});
+document.getElementById('garson-liste').addEventListener('click', e => {
+  const id = e.target.dataset.silId;
+  if (id && confirm('Bu garsonu silmek istiyor musunuz?')) remove(ref(db, 'garsonlar/' + id));
 });
 
 function baslat() {
@@ -237,27 +249,35 @@ function baslat() {
   });
   onValue(ref(db, 'garsonlar'), snap => {
     const el = document.getElementById('garson-liste');
-    if (!snap.exists()) { el.innerHTML = '<div class="bos">Henuz giris yapan garson yok.</div>'; return; }
+    if (!snap.exists()) { el.innerHTML = '<div class="bos">Henüz garson eklenmedi.</div>'; return; }
     const liste = [];
-    snap.forEach(c => liste.push(c.val()));
-    liste.sort((a, b) => (a.giris || 0) - (b.giris || 0));
-    el.innerHTML = liste.map((g, i) =>
+    snap.forEach(c => liste.push({ id: c.key, ...c.val() }));
+    el.innerHTML = liste.map(g =>
       '<div class="item-row">' +
-        '<div style="color:var(--muted);font-weight:700;min-width:24px;">' + (i+1) + '.</div>' +
         '<div class="item-info">' +
           '<div class="item-adi">👤 ' + g.ad + '</div>' +
-          '<div class="item-alt">' + (g.giris ? new Date(g.giris).toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'}) + ' girdi' : '') + '</div>' +
+          '<div class="item-alt" style="margin-top:0.3rem;"><span class="sifre-badge">🔑 ' + g.sifre + '</span></div>' +
         '</div>' +
+        '<button class="btn btn-danger" data-sil-id="' + g.id + '">Sil</button>' +
       '</div>'
     ).join('');
   });
+}
+
+async function garsonEkle() {
+  const ad = document.getElementById('garson-ad').value.trim();
+  const sifre = document.getElementById('garson-sifre').value.trim();
+  if (!ad || !sifre) { alert('Ad ve şifre girin!'); return; }
+  await push(ref(db, 'garsonlar'), { ad, sifre });
+  document.getElementById('garson-ad').value = '';
+  document.getElementById('garson-sifre').value = '';
 }
 
 async function urunEkle() {
   const ad = document.getElementById('urun-ad').value.trim();
   const fiyat = parseFloat(document.getElementById('urun-fiyat').value);
   const kat = document.getElementById('urun-kat').value.trim() || 'Genel';
-  if (!ad || isNaN(fiyat) || fiyat < 0) { alert('Urun adi ve gecerli fiyat girin!'); return; }
+  if (!ad || isNaN(fiyat) || fiyat < 0) { alert('Ürün adı ve geçerli fiyat girin!'); return; }
   await push(ref(db, 'urunler'), { ad, fiyat, kategori: kat });
   document.getElementById('urun-ad').value = '';
   document.getElementById('urun-fiyat').value = '';
@@ -266,7 +286,7 @@ async function urunEkle() {
 
 async function masaEkle() {
   const ad = document.getElementById('masa-ad').value.trim();
-  if (!ad) { alert('Masa adi girin!'); return; }
+  if (!ad) { alert('Masa adı girin!'); return; }
   await push(ref(db, 'masalar'), { ad });
   document.getElementById('masa-ad').value = '';
 }
@@ -274,7 +294,7 @@ async function masaEkle() {
 function urunListeRender() {
   const el = document.getElementById('urun-liste');
   const items = Object.values(urunler);
-  if (!items.length) { el.innerHTML = '<div class="bos">Henuz urun eklenmedi.</div>'; return; }
+  if (!items.length) { el.innerHTML = '<div class="bos">Henüz ürün eklenmedi.</div>'; return; }
   el.innerHTML = items.map(u =>
     '<div class="item-row">' +
       '<div class="item-info">' +
@@ -290,7 +310,7 @@ function urunListeRender() {
 function masaListeRender() {
   const el = document.getElementById('masa-liste');
   const items = Object.values(masalar);
-  if (!items.length) { el.innerHTML = '<div class="bos">Henuz masa eklenmedi.</div>'; return; }
+  if (!items.length) { el.innerHTML = '<div class="bos">Henüz masa eklenmedi.</div>'; return; }
   el.innerHTML = items.map(m =>
     '<div class="item-row">' +
       '<div class="item-info"><div class="item-adi">' + m.ad + '</div></div>' +
@@ -318,7 +338,7 @@ function raporRender() {
   });
   const sorted = Object.entries(sayac).sort((a, b) => b[1].adet - a[1].adet).slice(0, 10);
   const el = document.getElementById('r-urun-liste');
-  if (!sorted.length) { el.innerHTML = '<div class="bos">Henuz satis yok.</div>'; return; }
+  if (!sorted.length) { el.innerHTML = '<div class="bos">Henüz satış yok.</div>'; return; }
   el.innerHTML = sorted.map(([ad, v], i) =>
     '<div class="item-row">' +
       '<div style="color:var(--muted);font-weight:700;min-width:24px;">' + (i+1) + '.</div>' +
@@ -330,7 +350,7 @@ function raporRender() {
 
 function csvIndir() {
   const all = Object.values(siparisler);
-  if (!all.length) { alert('Henuz siparis yok!'); return; }
+  if (!all.length) { alert('Henüz sipariş yok!'); return; }
   const satirlar = [['Tarih','Saat','Garson','Masa','Urunler','Not','Toplam','Durum']];
   const durumlar = { bekliyor:'Bekliyor', hazirlaniyor:'Hazirlaniyor', hazir:'Hazir', teslim:'Teslim', odendi:'Odendi', iptal:'Iptal' };
   all.sort((a, b) => (a.zaman||0) - (b.zaman||0)).forEach(s => {
@@ -352,13 +372,9 @@ function csvIndir() {
 }
 
 async function siparisleriSifirla() {
-  if (confirm('TUM siparisler silinecek!') && confirm('Son onay — geri alinamaz.')) {
+  if (confirm('TÜM siparişler silinecek!') && confirm('Son onay — geri alınamaz.')) {
     await set(ref(db, 'siparisler'), null);
   }
-}
-
-async function garsonListesiSifirla() {
-  if (confirm('Garson listesi silinecek. Emin misiniz?')) await set(ref(db, 'garsonlar'), null);
 }
 </script>
 </body>
