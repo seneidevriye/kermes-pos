@@ -199,32 +199,8 @@ let bildirimKuyrugu = [];
 let bildirimAktif = false;
 let garsonlarCache = {};
 
-// Kategoriler sabit sırada — Firebase'den dinamik gelir ama sıra bu şekilde
-const KATEGORI_SIRA = ['Corba', 'Yemek', 'Tatli', 'Icecek'];
 
-function kategoriNormalize(k) {
-  if (!k) return '';
-  return k.trim()
-    .toLowerCase()
-    .replace(/\u00e7/g, 'c')   // ç
-    .replace(/\u011f/g, 'g')   // ğ
-    .replace(/\u0131/g, 'i')   // ı
-    .replace(/\u00f6/g, 'o')   // ö
-    .replace(/\u015f/g, 's')   // ş
-    .replace(/\u00fc/g, 'u')   // ü
-    .replace(/\u00c7/g, 'c')   // Ç
-    .replace(/\u011e/g, 'g')   // Ğ
-    .replace(/\u0130/g, 'i')   // İ
-    .replace(/\u00d6/g, 'o')   // Ö
-    .replace(/\u015e/g, 's')   // Ş
-    .replace(/\u00dc/g, 'u')   // Ü
-    .replace(/i/g, 'i')
-    .replace(/ /g, '');
-}
-
-let baslatildi = false;
-const garsonlarRef = ref(db, 'garsonlar');
-onValue(garsonlarRef, snap => {
+onValue(ref(db, 'garsonlar'), snap => {
   garsonlarCache = {};
   if (snap.exists()) snap.forEach(c => { garsonlarCache[c.key] = { id: c.key, ...c.val() }; });
   const kayitliKey = localStorage.getItem('kermes_garson_key');
@@ -235,7 +211,7 @@ onValue(garsonlarRef, snap => {
     document.getElementById('garson-adi-badge').textContent = g.ad;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
-    if (!baslatildi) { baslatildi = true; baslat(); }
+    baslat();
   }
 });
 
@@ -258,7 +234,7 @@ window.girisYap = function() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   hataEl.textContent = '';
-  if (!baslatildi) { baslatildi = true; baslat(); }
+  baslat();
 };
 
 window.cikisYap = function() {
@@ -314,13 +290,9 @@ document.getElementById('btn-bildirim-kapat').addEventListener('click', async ()
 document.getElementById('btn-siparis-gonder').addEventListener('click', siparisGonder);
 
 function baslat() {
-  if (baslat._calistirildi) return;
-  baslat._calistirildi = true;
-
   get(ref(db, 'urunler')).then(snap => {
     urunler = [];
     if (snap.exists()) snap.forEach(c => urunler.push({ id: c.key, ...c.val() }));
-    console.log('URUNLER SAYI:', urunler.length);
     aktifKategori = 'Hepsi';
     kategoriRender();
     urunGridRender();
