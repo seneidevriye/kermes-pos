@@ -183,7 +183,7 @@
 
 <script type="module">
 import { db } from './firebase-config.js';
-import { ref, push, onValue, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { ref, push, onValue, update, get, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 let garsonAdi = '';
 let garsonKey = '';
@@ -198,7 +198,7 @@ let bildirimGosterilenler = new Set();
 let bildirimKuyrugu = [];
 let bildirimAktif = false;
 let garsonlarCache = {};
-let baslatildi = false;
+
 
 onValue(ref(db, 'garsonlar'), snap => {
   garsonlarCache = {};
@@ -234,7 +234,7 @@ window.girisYap = function() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   hataEl.textContent = '';
-  if (!baslatildi) baslat();
+  baslat();
 };
 
 window.cikisYap = function() {
@@ -290,22 +290,25 @@ document.getElementById('btn-bildirim-kapat').addEventListener('click', async ()
 document.getElementById('btn-siparis-gonder').addEventListener('click', siparisGonder);
 
 function baslat() {
-  if (baslatildi) return;
-  baslatildi = true;
+  console.log('[DEBUG] baslat() calisti, garsonAdi:', garsonAdi);
 
-  onValue(ref(db, 'urunler'), snap => {
+  get(ref(db, 'urunler')).then(snap => {
+    console.log('[DEBUG] urunler - exists:', snap.exists(), '- val:', snap.val());
     urunler = [];
     if (snap.exists()) snap.forEach(c => urunler.push({ id: c.key, ...c.val() }));
+    console.log('[DEBUG] urunler dizisi uzunluk:', urunler.length);
     aktifKategori = 'Hepsi';
     kategoriRender();
     urunGridRender();
-  });
+  }).catch(e => console.error('[DEBUG] urunler HATA:', e));
 
-  onValue(ref(db, 'masalar'), snap => {
+  get(ref(db, 'masalar')).then(snap => {
+    console.log('[DEBUG] masalar - exists:', snap.exists(), '- val:', snap.val());
     masalar = [];
     if (snap.exists()) snap.forEach(c => masalar.push({ id: c.key, ...c.val() }));
+    console.log('[DEBUG] masalar dizisi uzunluk:', masalar.length);
     masaGridRender();
-  });
+  }).catch(e => console.error('[DEBUG] masalar HATA:', e));
 
   onValue(ref(db, 'siparisler'), snap => {
     siparislerim = {};
