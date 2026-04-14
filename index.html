@@ -322,6 +322,7 @@ function baslat() {
   onValue(ref(db, 'urunler'), snap => {
     urunler = [];
     if (snap.exists()) snap.forEach(c => urunler.push({ id: c.key, ...c.val() }));
+    console.log('URUNLER:', urunler.map(u => ({ ad: u.ad, kategori: u.kategori, len: (u.kategori||'').length, codes: [...(u.kategori||'')].map(c => c.charCodeAt(0)) })));
     aktifKategori = 'Tumu';
     kategoriRender();
     urunGridRender();
