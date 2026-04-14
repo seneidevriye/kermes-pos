@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eryaman Etkinlik — Kasa</title>
+<title>Kermes POS — Kasa</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -96,14 +96,50 @@
     color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;
   }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; gap: 1.5rem; }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: var(--accent); letter-spacing: 4px; }
+  .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 1rem; }
+  .login-card h2 { font-size: 1rem; color: var(--muted); font-weight: 500; }
+  .login-hata { color: var(--red); font-size: 0.85rem; text-align: center; min-height: 18px; }
+  .login-input { width: 100%; padding: 0.85rem 1rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 1rem; outline: none; transition: border-color 0.2s; }
+  .login-input:focus { border-color: var(--accent); }
+  .login-btn { width: 100%; padding: 0.9rem; border: none; border-radius: 10px; background: var(--accent); color: #000; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; }
+  .kasa-badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.8rem; color: var(--muted); }
+  .kasa-badge span { color: var(--text); font-weight: 600; }
+  .cikis-btn { background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 0.75rem; padding: 0.3rem 0.7rem; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 </style>
 </head>
 <body>
+
+<!-- GİRİŞ EKRANI -->
+<div id="login-screen">
+  <div class="logo">💰 KASA</div>
+  <div class="login-card">
+    <h2>Kasa Girişi</h2>
+    <input type="text" class="login-input" id="kasa-kullanici" placeholder="Kullanıcı adı...">
+    <input type="password" class="login-input" id="kasa-sifre" placeholder="Şifre...">
+    <div class="login-hata" id="login-hata"></div>
+    <button class="login-btn" id="btn-giris">Giriş Yap</button>
+  </div>
+  <div style="display:flex;gap:1rem;">
+    <a href="index.html" style="color:var(--muted);font-size:0.85rem;text-decoration:none;">📱 Garson</a>
+    <a href="mutfak.html" style="color:var(--muted);font-size:0.85rem;text-decoration:none;">🍳 Mutfak</a>
+    <a href="yonetici.html" style="color:var(--muted);font-size:0.85rem;text-decoration:none;">⚙️ Yönetici</a>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;">
 
 <div class="header">
   <div>
     <div class="header-title">💰 KASA</div>
     <div style="font-size:0.8rem;color:var(--muted)" id="header-sub">Bağlanıyor...</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:0.5rem;">
+    <div class="kasa-badge">👤 <span id="kasa-adi-badge"></span></div>
+    <button class="cikis-btn" id="btn-cikis">Çıkış</button>
   </div>
 </div>
 
@@ -114,24 +150,15 @@
 </div>
 
 <div class="ozet-bar">
-  <div class="ozet-item">
-    <div class="ozet-label">Bekleyen</div>
-    <div class="ozet-val" id="oz-bekleyen">0</div>
-  </div>
-  <div class="ozet-item">
-    <div class="ozet-label">Hazır</div>
-    <div class="ozet-val" id="oz-hazir">0</div>
-  </div>
-  <div class="ozet-item">
-    <div class="ozet-label">Günlük Ciro</div>
-    <div class="ozet-val" id="oz-ciro">₺0</div>
-  </div>
+  <div class="ozet-item"><div class="ozet-label">Bekleyen</div><div class="ozet-val" id="oz-bekleyen">0</div></div>
+  <div class="ozet-item"><div class="ozet-label">Hazır</div><div class="ozet-val" id="oz-hazir">0</div></div>
+  <div class="ozet-item"><div class="ozet-label">Günlük Ciro</div><div class="ozet-val" id="oz-ciro">₺0</div></div>
 </div>
 
 <div class="tabs">
-  <div class="tab active" onclick="sekmeAc('hazir-tab', this)">✅ Hazır</div>
-  <div class="tab" onclick="sekmeAc('bekliyor-tab', this)">⏳ Bekliyor</div>
-  <div class="tab" onclick="sekmeAc('gecmis-tab', this)">📋 Geçmiş</div>
+  <div class="tab active" data-tab="hazir-tab">✅ Hazır</div>
+  <div class="tab" data-tab="bekliyor-tab">⏳ Bekliyor</div>
+  <div class="tab" data-tab="gecmis-tab">📋 Geçmiş</div>
 </div>
 
 <div class="content" id="content">
@@ -140,95 +167,144 @@
   <div id="gecmis-tab" style="display:none;"></div>
 </div>
 
+</div>
+
 <script type="module">
 import { db } from './firebase-config.js';
 import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 let siparisler = {};
 let aktifTab = 'hazir-tab';
+let garsonlarCache = {};
+let kasaAdi = '';
 
-onValue(ref(db, 'siparisler'), snap => {
-  siparisler = {};
-  if (snap.exists()) {
-    snap.forEach(c => { siparisler[c.key] = { id: c.key, ...c.val() }; });
+// Garsonları yükle, localStorage kontrolü yap
+onValue(ref(db, 'garsonlar'), snap => {
+  garsonlarCache = {};
+  if (snap.exists()) snap.forEach(c => { garsonlarCache[c.key] = { id: c.key, ...c.val() }; });
+
+  const kayitliKey = localStorage.getItem('kermes_kasa_key');
+  if (kayitliKey && garsonlarCache[kayitliKey]?.kasa && !kasaAdi) {
+    kasaAdi = garsonlarCache[kayitliKey].ad;
+    document.getElementById('kasa-adi-badge').textContent = kasaAdi;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    baslat();
   }
-  render();
 });
+
+// Giriş
+document.getElementById('btn-giris').addEventListener('click', girisYap);
+document.getElementById('kasa-sifre').addEventListener('keypress', e => { if (e.key === 'Enter') girisYap(); });
+document.getElementById('kasa-kullanici').addEventListener('keypress', e => { if (e.key === 'Enter') document.getElementById('kasa-sifre').focus(); });
+
+function girisYap() {
+  const kullanici = document.getElementById('kasa-kullanici').value.trim();
+  const sifre = document.getElementById('kasa-sifre').value.trim();
+  if (!kullanici || !sifre) { document.getElementById('login-hata').textContent = 'Kullanıcı adı ve şifre girin!'; return; }
+  const bulunan = Object.values(garsonlarCache).find(g => g.ad === kullanici && g.sifre === sifre);
+  if (!bulunan) {
+    document.getElementById('login-hata').textContent = 'Kullanıcı adı veya şifre yanlış!';
+    document.getElementById('kasa-sifre').value = '';
+    return;
+  }
+  if (!bulunan.kasa) {
+    document.getElementById('login-hata').textContent = 'Bu kullanıcının kasa erişimi yok!';
+    document.getElementById('kasa-sifre').value = '';
+    return;
+  }
+  kasaAdi = bulunan.ad;
+  localStorage.setItem('kermes_kasa_key', bulunan.id);
+  document.getElementById('kasa-adi-badge').textContent = bulunan.ad;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('login-hata').textContent = '';
+  baslat();
+}
+
+// Çıkış
+document.getElementById('btn-cikis').addEventListener('click', () => {
+  if (confirm('Çıkış yapmak istiyor musunuz?')) {
+    localStorage.removeItem('kermes_kasa_key');
+    location.reload();
+  }
+});
+
+// Tab geçişleri
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    ['hazir-tab','bekliyor-tab','gecmis-tab'].forEach(id => {
+      document.getElementById(id).style.display = id === tab.dataset.tab ? 'block' : 'none';
+    });
+    aktifTab = tab.dataset.tab;
+  });
+});
+
+// Ödeme al (event delegation)
+document.getElementById('content').addEventListener('click', async e => {
+  const id = e.target.dataset.odemeId;
+  if (id && confirm('Ödeme alındı ve sipariş kapatılsın mı?')) {
+    await update(ref(db, 'siparisler/' + id), { durum: 'odendi' });
+  }
+});
+
+function baslat() {
+  onValue(ref(db, 'siparisler'), snap => {
+    siparisler = {};
+    if (snap.exists()) snap.forEach(c => { siparisler[c.key] = { id: c.key, ...c.val() }; });
+    render();
+  });
+}
 
 function render() {
   const all = Object.values(siparisler);
-
   const hazirlar = all.filter(s => s.durum === 'hazir' || s.durum === 'teslim');
   const bekleyenler = all.filter(s => s.durum === 'bekliyor' || s.durum === 'hazirlaniyor');
   const gecmis = all.filter(s => s.durum === 'odendi');
 
   document.getElementById('oz-bekleyen').textContent = bekleyenler.length;
   document.getElementById('oz-hazir').textContent = hazirlar.filter(s => s.durum === 'hazir' || s.durum === 'teslim').length;
-  const ciro = gecmis.reduce((t, s) => t + (s.toplam || 0), 0);
-  document.getElementById('oz-ciro').textContent = `₺${ciro}`;
-  document.getElementById('header-sub').textContent = `${hazirlar.filter(s=>s.durum==='hazir').length} ödeme bekliyor`;
+  document.getElementById('oz-ciro').textContent = '₺' + gecmis.reduce((t, s) => t + (s.toplam || 0), 0);
+  document.getElementById('header-sub').textContent = hazirlar.filter(s => s.durum === 'hazir').length + ' ödeme bekliyor';
 
-  renderTab('hazir-tab', hazirlar.sort((a,b)=>(b.zaman||0)-(a.zaman||0)));
-  renderTab('bekliyor-tab', bekleyenler.sort((a,b)=>(a.zaman||0)-(b.zaman||0)));
-  renderTab('gecmis-tab', gecmis.sort((a,b)=>(b.zaman||0)-(a.zaman||0)));
+  renderTab('hazir-tab', hazirlar.sort((a,b) => (b.zaman||0)-(a.zaman||0)));
+  renderTab('bekliyor-tab', bekleyenler.sort((a,b) => (a.zaman||0)-(b.zaman||0)));
+  renderTab('gecmis-tab', gecmis.sort((a,b) => (b.zaman||0)-(a.zaman||0)));
 }
 
 function renderTab(tabId, items) {
   const el = document.getElementById(tabId);
-  if (items.length === 0) {
-    el.innerHTML = '<div class="bos-ekran"><div class="icon">🎉</div><p>Gösterilecek sipariş yok.</p></div>';
-    return;
-  }
+  if (!items.length) { el.innerHTML = '<div class="bos-ekran"><div class="icon">🎉</div><p>Gösterilecek sipariş yok.</p></div>'; return; }
   el.innerHTML = items.map(s => {
     const isHazir = s.durum === 'hazir' || s.durum === 'teslim';
     const isOdendi = s.durum === 'odendi';
     const durumBadge = isOdendi
-      ? `<span class="durum-badge" style="background:rgba(46,204,113,0.1);color:#2ecc71">✓ Ödendi</span>`
+      ? '<span class="durum-badge" style="background:rgba(46,204,113,0.1);color:#2ecc71">✓ Ödendi</span>'
       : isHazir
-        ? `<span class="durum-badge badge-hazir">✅ Hazır</span>`
-        : `<span class="durum-badge badge-bekliyor">⏳ ${s.durum === 'hazirlaniyor' ? 'Hazırlanıyor' : 'Bekliyor'}</span>`;
+        ? '<span class="durum-badge badge-hazir">✅ Hazır</span>'
+        : '<span class="durum-badge badge-bekliyor">⏳ ' + (s.durum === 'hazirlaniyor' ? 'Hazırlanıyor' : 'Bekliyor') + '</span>';
 
-    return `<div class="siparis-card ${isHazir ? 'hazir' : ''}">
-      <div class="siparis-top">
-        <div>
-          <div class="siparis-masa">${s.masaAd}</div>
-          <div class="siparis-garson">👤 ${s.garson}</div>
-        </div>
-        ${durumBadge}
-      </div>
-      <div class="siparis-body">
-        ${s.urunler.map(u => `<div class="urun-satir">
-          <span class="urun-adet">${u.adet}</span>
-          <span class="urun-ad">${u.ad}</span>
-          <span class="urun-tutar">₺${u.fiyat * u.adet}</span>
-        </div>`).join('')}
-        ${s.not ? `<div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem;">📝 ${s.not}</div>` : ''}
-      </div>
-      <div class="siparis-footer">
-        <div class="toplam-text">₺${s.toplam}</div>
-        ${!isOdendi && tabId !== 'bekliyor-tab'
-          ? `<button class="btn btn-odendi" onclick="odemeAl('${s.id}')">💵 Ödeme Alındı</button>`
-          : isOdendi ? '' : `<span style="font-size:0.8rem;color:var(--muted)">Mutfak hazırlıyor...</span>`
-        }
-      </div>
-    </div>`;
+    return '<div class="siparis-card ' + (isHazir ? 'hazir' : '') + '">' +
+      '<div class="siparis-top"><div>' +
+        '<div class="siparis-masa">' + s.masaAd + '</div>' +
+        '<div class="siparis-garson">👤 ' + s.garson + '</div>' +
+      '</div>' + durumBadge + '</div>' +
+      '<div class="siparis-body">' +
+        (s.urunler || []).map(u =>
+          '<div class="urun-satir"><span class="urun-adet">' + u.adet + '</span><span class="urun-ad">' + u.ad + '</span><span class="urun-tutar">₺' + (u.fiyat * u.adet) + '</span></div>'
+        ).join('') +
+        (s.not ? '<div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem;">📝 ' + s.not + '</div>' : '') +
+      '</div>' +
+      '<div class="siparis-footer"><div class="toplam-text">₺' + s.toplam + '</div>' +
+        (!isOdendi && tabId !== 'bekliyor-tab'
+          ? '<button class="btn btn-odendi" data-odeme-id="' + s.id + '">💵 Ödeme Alındı</button>'
+          : isOdendi ? '' : '<span style="font-size:0.8rem;color:var(--muted)">Mutfak hazırlıyor...</span>'
+        ) +
+      '</div></div>';
   }).join('');
 }
-
-window.odemeAl = async function(id) {
-  if (confirm('Ödeme alındı ve sipariş kapatılsın mı?')) {
-    await update(ref(db, `siparisler/${id}`), { durum: 'odendi' });
-  }
-};
-
-window.sekmeAc = function(tabId, el) {
-  ['hazir-tab', 'bekliyor-tab', 'gecmis-tab'].forEach(t => {
-    document.getElementById(t).style.display = t === tabId ? 'block' : 'none';
-  });
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  aktifTab = tabId;
-};
 </script>
 </body>
 </html>
