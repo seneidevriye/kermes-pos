@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -17,108 +18,118 @@
   --gold: #ffd166;
   --text: #f0eeff;
   --muted: #6b6b80;
-  --radius: 14px;
+  --radius: 12px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
 
-#login-screen {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-height: 100vh; padding: 2rem; gap: 2rem;
-  background: radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.12) 0%, transparent 70%);
+/* LOGIN */
+#login-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:2rem; gap:2rem; background:radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.1) 0%, transparent 65%); }
+.logo { font-family:'Syne',sans-serif; font-size:2.8rem; font-weight:800; letter-spacing:-1px; }
+.logo em { color:var(--accent); font-style:normal; }
+.login-box { width:100%; max-width:380px; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:2rem; display:flex; flex-direction:column; gap:1rem; }
+.login-box h2 { font-size:0.78rem; color:var(--muted); font-weight:500; letter-spacing:2px; text-transform:uppercase; }
+.inp { width:100%; padding:0.9rem 1rem; background:var(--card2); border:1.5px solid var(--border); border-radius:10px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:1rem; outline:none; transition:border-color 0.2s; }
+.inp:focus { border-color:var(--accent); }
+.err { color:var(--red); font-size:0.82rem; text-align:center; min-height:18px; font-weight:600; }
+.btn-login { width:100%; padding:1rem; border:none; border-radius:12px; background:var(--accent); color:#fff; font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; cursor:pointer; letter-spacing:1px; }
+.btn-login:active { opacity:0.85; }
+.nav-alt { display:flex; gap:1.5rem; }
+.nav-alt a { color:var(--muted); font-size:0.82rem; text-decoration:none; }
+
+/* APP */
+#app { display:none; flex-direction:column; min-height:100vh; }
+.topbar { background:var(--card); border-bottom:1px solid var(--border); padding:0.75rem 1rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+.topbar-logo { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800; }
+.topbar-logo em { color:var(--accent); font-style:normal; }
+.user-chip { background:var(--card2); border:1px solid var(--border); border-radius:20px; padding:0.3rem 0.8rem; font-size:0.78rem; color:var(--muted); }
+.user-chip span { color:var(--text); font-weight:600; }
+.btn-cikis { background:transparent; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-size:0.75rem; padding:0.3rem 0.7rem; cursor:pointer; font-family:'DM Sans',sans-serif; }
+.nav-bar { display:flex; gap:1rem; padding:0.6rem 1rem; background:var(--card); border-bottom:1px solid var(--border); }
+.nav-bar a { color:var(--muted); font-size:0.8rem; text-decoration:none; }
+.tabs { display:flex; background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:57px; z-index:99; }
+.tab { flex:1; padding:0.85rem; text-align:center; font-size:0.85rem; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.content { padding:1rem; flex:1; padding-bottom:5rem; }
+.sec-label { font-size:0.7rem; font-weight:700; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-bottom:0.5rem; }
+
+/* MASA — native select */
+.masa-select-wrap { position:relative; margin-bottom:1.25rem; }
+.masa-select {
+  width:100%; padding:0.85rem 2.5rem 0.85rem 1rem;
+  background:var(--card2); border:1.5px solid var(--border); border-radius:var(--radius);
+  color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.95rem; font-weight:600;
+  outline:none; cursor:pointer; appearance:none; -webkit-appearance:none;
+  transition:border-color 0.2s;
 }
-.logo { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; color: var(--text); letter-spacing: -1px; }
-.logo em { color: var(--accent); font-style: normal; }
-.login-box { width: 100%; max-width: 380px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; display: flex; flex-direction: column; gap: 1rem; }
-.login-box h2 { font-size: 0.8rem; color: var(--muted); font-weight: 500; letter-spacing: 2px; text-transform: uppercase; }
-.inp { width: 100%; padding: 0.9rem 1rem; background: var(--card2); border: 1.5px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 1rem; outline: none; transition: border-color 0.2s; }
-.inp:focus { border-color: var(--accent); }
-.err { color: var(--red); font-size: 0.82rem; text-align: center; min-height: 18px; font-weight: 600; }
-.btn-login { width: 100%; padding: 1rem; border: none; border-radius: 12px; background: var(--accent); color: #fff; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; letter-spacing: 1px; transition: opacity 0.2s, transform 0.1s; }
-.btn-login:active { transform: scale(0.98); opacity: 0.9; }
-.nav-alt { display: flex; gap: 1.5rem; }
-.nav-alt a { color: var(--muted); font-size: 0.82rem; text-decoration: none; }
+.masa-select:focus, .masa-select.selected { border-color:var(--accent); }
+.masa-select-arrow { position:absolute; right:1rem; top:50%; transform:translateY(-50%); pointer-events:none; color:var(--muted); font-size:0.8rem; }
+.masa-select option { background:#1c1c22; color:#f0eeff; }
 
-#app { display: none; flex-direction: column; min-height: 100vh; }
-.topbar { background: var(--card); border-bottom: 1px solid var(--border); padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-.topbar-logo { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; }
-.topbar-logo em { color: var(--accent); font-style: normal; }
-.user-chip { background: var(--card2); border: 1px solid var(--border); border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 0.4rem; }
-.user-chip span { color: var(--text); font-weight: 600; }
-.btn-cikis { background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 0.75rem; padding: 0.3rem 0.7rem; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-.nav-bar { display: flex; gap: 1rem; padding: 0.6rem 1rem; background: var(--card); border-bottom: 1px solid var(--border); }
-.nav-bar a { color: var(--muted); font-size: 0.8rem; text-decoration: none; }
-.tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 57px; z-index: 99; }
-.tab { flex: 1; padding: 0.85rem; text-align: center; font-size: 0.85rem; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
-.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-.content { padding: 1rem; flex: 1; }
+/* KATEGORİ — button grubu */
+.kat-group { display:flex; flex-wrap:wrap; gap:0.4rem; margin-bottom:1rem; }
+.kat-btn { padding:0.4rem 0.9rem; background:var(--card); border:1px solid var(--border); border-radius:8px; font-size:0.8rem; font-weight:500; cursor:pointer; color:var(--muted); font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+.kat-btn.active { background:var(--card2); border-color:var(--accent); color:var(--accent); font-weight:700; }
 
-.section-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.6rem; }
+/* ÜRÜN — tam genişlik liste */
+.urun-liste { display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.25rem; }
+.urun-row {
+  display:flex; align-items:center; background:var(--card);
+  border:1.5px solid var(--border); border-radius:var(--radius);
+  padding:0.75rem 1rem; gap:0.75rem; transition:border-color 0.2s;
+}
+.urun-row.in-cart { border-color:var(--accent); background:rgba(255,107,53,0.05); }
+.urun-info { flex:1; min-width:0; }
+.urun-ad { font-weight:600; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.urun-fiyat { color:var(--gold); font-weight:700; font-size:0.85rem; margin-top:0.15rem; }
+.qty-wrap { display:flex; align-items:center; gap:0.4rem; flex-shrink:0; }
+.qty-btn { width:30px; height:30px; border-radius:8px; border:1px solid var(--border); background:var(--card2); color:var(--text); font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:700; font-family:'DM Sans',sans-serif; }
+.qty-btn:active { background:var(--accent); border-color:var(--accent); color:#fff; }
+.qty-num { font-weight:700; font-size:0.95rem; min-width:22px; text-align:center; color:var(--accent); }
+.add-btn { width:30px; height:30px; border-radius:8px; border:none; background:var(--accent); color:#fff; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:700; }
+.add-btn:active { opacity:0.8; }
 
-/* MASA — yatay scroll pill */
-.masa-scroll { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 1.25rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-.masa-scroll::-webkit-scrollbar { display: none; }
-.masa-pill { flex-shrink: 0; padding: 0.5rem 1.1rem; background: var(--card); border: 1.5px solid var(--border); border-radius: 50px; font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.15s; color: var(--text); user-select: none; }
-.masa-pill.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+.not-input { width:100%; resize:none; height:60px; font-size:0.85rem; background:var(--card2); border:1.5px solid var(--border); border-radius:10px; color:var(--text); font-family:'DM Sans',sans-serif; padding:0.8rem 1rem; outline:none; margin-bottom:1rem; }
+.not-input:focus { border-color:var(--accent); }
+.empty-msg { color:var(--muted); font-size:0.88rem; padding:1.5rem 0; text-align:center; }
 
-/* KATEGORİ */
-.kat-scroll { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.25rem; margin-bottom: 0.75rem; scrollbar-width: none; }
-.kat-scroll::-webkit-scrollbar { display: none; }
-.kat-chip { flex-shrink: 0; padding: 0.35rem 0.9rem; background: var(--card); border: 1px solid var(--border); border-radius: 20px; font-size: 0.78rem; font-weight: 500; cursor: pointer; white-space: nowrap; color: var(--muted); transition: all 0.15s; }
-.kat-chip.active { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+/* SEPET BAR */
+.sepet-bar { display:none; position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); padding:0.9rem 1rem; z-index:98; }
+.sepet-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.7rem; }
+.sepet-toplam { font-family:'Syne',sans-serif; font-size:1.6rem; color:var(--gold); font-weight:800; }
+.btn-gonder { width:100%; padding:0.95rem; border:none; border-radius:12px; background:var(--accent); color:#fff; font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; cursor:pointer; letter-spacing:1px; }
+.btn-gonder:active { opacity:0.9; }
 
-/* ÜRÜN GRID */
-.urun-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 1.25rem; }
-.urun-card { background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 0.9rem; transition: all 0.15s; }
-.urun-card.in-cart { border-color: var(--accent); background: rgba(255,107,53,0.06); }
-.urun-name { font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; line-height: 1.3; }
-.urun-price { color: var(--gold); font-weight: 700; font-size: 0.9rem; }
-.urun-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 0.6rem; }
-.qty-ctrl { display: flex; align-items: center; gap: 0.35rem; }
-.qty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); background: var(--card2); color: var(--text); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
-.qty-btn:active { background: var(--accent); border-color: var(--accent); }
-.qty-num { font-weight: 700; font-size: 0.9rem; min-width: 18px; text-align: center; color: var(--accent); }
-.add-btn { width: 28px; height: 28px; border-radius: 50%; border: none; background: var(--accent); color: #fff; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+/* SİPARİŞLERİM */
+.filtre-row { display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:1rem; }
+.f-chip { padding:0.35rem 0.8rem; background:var(--card); border:1px solid var(--border); border-radius:8px; font-size:0.78rem; font-weight:500; cursor:pointer; color:var(--muted); font-family:'DM Sans',sans-serif; }
+.f-chip.active { border-color:var(--accent); color:var(--accent); font-weight:700; }
+.sip-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:1rem; margin-bottom:0.6rem; }
+.sip-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; }
+.sip-masa { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; }
+.sip-sure { font-size:0.72rem; color:var(--muted); }
+.sip-badge { display:inline-flex; align-items:center; padding:0.18rem 0.65rem; border-radius:8px; font-size:0.72rem; font-weight:700; margin-bottom:0.4rem; }
+.b-bekliyor { background:rgba(255,209,102,0.12); color:var(--gold); }
+.b-hazirlaniyor { background:rgba(255,107,53,0.12); color:var(--accent); }
+.b-hazir { background:rgba(0,214,143,0.15); color:var(--green); }
+.b-teslim { background:rgba(0,214,143,0.08); color:var(--green); }
+.b-odendi { background:rgba(107,107,128,0.15); color:var(--muted); }
+.sip-urunler { font-size:0.82rem; color:var(--muted); }
+.sip-toplam { font-size:0.85rem; color:var(--gold); font-weight:700; margin-top:0.4rem; }
+.btn-temizle { width:100%; margin-top:0.75rem; padding:0.8rem; background:rgba(255,71,87,0.1); color:var(--red); border:1px solid rgba(255,71,87,0.25); border-radius:10px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.85rem; cursor:pointer; }
 
-.empty { text-align: center; color: var(--muted); padding: 2rem 1rem; font-size: 0.88rem; grid-column: 1/-1; }
-.not-input { width: 100%; resize: none; height: 64px; font-size: 0.85rem; background: var(--card2); border: 1.5px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; padding: 0.8rem 1rem; outline: none; margin-bottom: 1rem; }
-.not-input:focus { border-color: var(--accent); }
-
-.sepet-bar { display: none; position: sticky; bottom: 0; background: var(--card); border-top: 1px solid var(--border); padding: 0.9rem 1rem; }
-.sepet-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.7rem; }
-.sepet-toplam { font-family: 'Syne', sans-serif; font-size: 1.6rem; color: var(--gold); font-weight: 800; }
-.btn-gonder { width: 100%; padding: 0.95rem; border: none; border-radius: 12px; background: var(--accent); color: #fff; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; letter-spacing: 1px; }
-.btn-gonder:active { opacity: 0.9; }
-
-.filtre-row { display: flex; gap: 0.4rem; overflow-x: auto; scrollbar-width: none; margin-bottom: 1rem; padding-bottom: 0.25rem; }
-.filtre-row::-webkit-scrollbar { display: none; }
-.f-chip { flex-shrink: 0; padding: 0.35rem 0.8rem; background: var(--card); border: 1px solid var(--border); border-radius: 20px; font-size: 0.78rem; font-weight: 500; cursor: pointer; color: var(--muted); }
-.f-chip.active { border-color: var(--accent); color: var(--accent); font-weight: 700; }
-.sip-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 0.6rem; }
-.sip-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
-.sip-masa { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
-.sip-sure { font-size: 0.72rem; color: var(--muted); }
-.sip-badge { display: inline-flex; align-items: center; padding: 0.18rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 700; margin-bottom: 0.4rem; }
-.b-bekliyor { background: rgba(255,209,102,0.12); color: var(--gold); }
-.b-hazirlaniyor { background: rgba(255,107,53,0.12); color: var(--accent); }
-.b-hazir { background: rgba(0,214,143,0.15); color: var(--green); }
-.b-teslim { background: rgba(0,214,143,0.08); color: var(--green); opacity: 0.7; }
-.b-odendi { background: rgba(107,107,128,0.15); color: var(--muted); }
-.sip-urunler { font-size: 0.82rem; color: var(--muted); }
-.sip-toplam { font-size: 0.85rem; color: var(--gold); font-weight: 700; margin-top: 0.4rem; }
-.btn-temizle { width: 100%; margin-top: 0.75rem; padding: 0.8rem; background: rgba(255,71,87,0.1); color: var(--red); border: 1px solid rgba(255,71,87,0.25); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
-
-#bildirim { display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 999; background: var(--green); padding: 0.75rem 1rem; animation: slideDown 0.3s ease; }
-@keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-.bildirim-ic { display: flex; align-items: center; gap: 0.75rem; max-width: 500px; margin: 0 auto; }
-.bildirim-text { flex: 1; }
-.bildirim-baslik { font-family: 'Syne', sans-serif; font-size: 1rem; color: #000; font-weight: 700; }
-.bildirim-masa { font-size: 0.78rem; color: rgba(0,0,0,0.65); }
-.btn-teslim { background: rgba(0,0,0,0.2); border: none; border-radius: 8px; color: #000; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 0.78rem; padding: 0.4rem 0.8rem; cursor: pointer; white-space: nowrap; }
+/* BİLDİRİM */
+#bildirim { display:none; position:fixed; top:0; left:0; right:0; z-index:999; background:var(--green); padding:0.75rem 1rem; }
+.bil-ic { display:flex; align-items:center; gap:0.75rem; max-width:500px; margin:0 auto; }
+.bil-text { flex:1; }
+.bil-baslik { font-family:'Syne',sans-serif; font-size:1rem; color:#000; font-weight:700; }
+.bil-masa { font-size:0.78rem; color:rgba(0,0,0,0.65); }
+.btn-teslim { background:rgba(0,0,0,0.2); border:none; border-radius:8px; color:#000; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.78rem; padding:0.4rem 0.8rem; cursor:pointer; white-space:nowrap; }
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="logo">KERMES<em>POS</em></div>
   <div class="login-box">
@@ -135,6 +146,7 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
   </div>
 </div>
 
+<!-- APP -->
 <div id="app">
   <div class="topbar">
     <div class="topbar-logo">KERMES<em>POS</em></div>
@@ -153,22 +165,30 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
     <div class="tab" id="tab-siparislerim">📋 Siparişlerim</div>
   </div>
 
+  <!-- SİPARİŞ PANELİ -->
   <div class="content" id="pane-siparis">
-    <div class="section-label">Masa Seç</div>
-    <div class="masa-scroll" id="masa-scroll">
-      <span style="color:var(--muted);font-size:0.85rem;">Yükleniyor...</span>
+
+    <div class="sec-label">Masa Seç</div>
+    <div class="masa-select-wrap">
+      <select class="masa-select" id="masa-select">
+        <option value="">— Masa seçin —</option>
+      </select>
+      <div class="masa-select-arrow">▼</div>
     </div>
 
-    <div class="section-label">Ürünler</div>
-    <div class="kat-scroll" id="kat-scroll"></div>
-    <div class="urun-grid" id="urun-grid">
-      <div class="empty">Yükleniyor...</div>
+    <div class="sec-label">Kategori</div>
+    <div class="kat-group" id="kat-group"></div>
+
+    <div class="sec-label">Ürünler</div>
+    <div class="urun-liste" id="urun-liste">
+      <div class="empty-msg">Yükleniyor...</div>
     </div>
 
-    <div class="section-label">Not (opsiyonel)</div>
+    <div class="sec-label">Not (opsiyonel)</div>
     <textarea class="not-input" id="siparis-not" placeholder="Özel istek, alerji vb..."></textarea>
   </div>
 
+  <!-- SİPARİŞLERİM PANELİ -->
   <div class="content" id="pane-siparislerim" style="display:none;">
     <div class="filtre-row" id="filtre-row">
       <div class="f-chip active" data-f="hepsi">Hepsi</div>
@@ -181,6 +201,7 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
     <button class="btn-temizle" id="btn-temizle">🗑️ Teslim Edilenleri Temizle</button>
   </div>
 
+  <!-- SEPET BAR -->
   <div class="sepet-bar" id="sepet-bar">
     <div class="sepet-row">
       <span style="font-size:0.85rem;color:var(--muted);">Toplam</span>
@@ -190,12 +211,13 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
   </div>
 </div>
 
+<!-- BİLDİRİM -->
 <div id="bildirim">
-  <div class="bildirim-ic">
+  <div class="bil-ic">
     <div>🔔</div>
-    <div class="bildirim-text">
-      <div class="bildirim-baslik">SİPARİŞ HAZIR!</div>
-      <div class="bildirim-masa" id="bildirim-masa"></div>
+    <div class="bil-text">
+      <div class="bil-baslik">SİPARİŞ HAZIR!</div>
+      <div class="bil-masa" id="bil-masa"></div>
     </div>
     <button class="btn-teslim" id="btn-teslim">Teslim Alındı ✓</button>
   </div>
@@ -219,7 +241,7 @@ const db = getDatabase(initializeApp({
 // ── State ──
 let garsonAdi = '', garsonKey = '';
 let masalar = [], urunler = [];
-let sepet = {}, seciliMasa = null;
+let sepet = {};
 let aktifKat = 'Hepsi', aktifFiltre = 'hepsi';
 let siparislerim = {};
 let bildirimGosterilenler = new Set();
@@ -262,7 +284,7 @@ document.getElementById('btn-cikis').onclick = () => {
   if (confirm('Çıkış yapmak istiyor musunuz?')) { localStorage.removeItem('kermes_garson_key'); location.reload(); }
 };
 
-// ── Başlat ──
+// ── Başlat (tek sefer) ──
 function baslat() {
   if (baslatildi) return;
   baslatildi = true;
@@ -315,64 +337,76 @@ document.getElementById('tab-siparislerim').onclick = () => {
   document.getElementById('sepet-bar').style.display = 'none';
 };
 
-// ── Masalar ──
+// ── Masalar — native select ──
 function renderMasalar() {
-  const el = document.getElementById('masa-scroll');
-  if (!masalar.length) {
-    el.innerHTML = '<span style="color:var(--muted);font-size:0.85rem;padding:0.5rem 0;">Yönetici panelinden masa ekleyin.</span>';
-    return;
-  }
-  el.innerHTML = masalar.map(m =>
-    `<div class="masa-pill${seciliMasa === m.id ? ' selected' : ''}" data-id="${m.id}">${m.ad}</div>`
-  ).join('');
+  const sel = document.getElementById('masa-select');
+  const mevcutDeger = sel.value;
+  sel.innerHTML = '<option value="">— Masa seçin —</option>';
+  masalar.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.ad;
+    sel.appendChild(opt);
+  });
+  if (mevcutDeger) sel.value = mevcutDeger;
 }
-document.getElementById('masa-scroll').addEventListener('click', e => {
-  const p = e.target.closest('.masa-pill');
-  if (!p) return;
-  seciliMasa = p.dataset.id;
-  renderMasalar();
+document.getElementById('masa-select').addEventListener('change', e => {
+  if (e.target.value) e.target.classList.add('selected');
+  else e.target.classList.remove('selected');
   renderSepetBar();
 });
+
+function getSeciliMasa() {
+  return document.getElementById('masa-select').value || null;
+}
 
 // ── Kategoriler ──
 function renderKategoriler() {
   const katlar = ['Hepsi', ...new Set(urunler.map(u => (u.kategori || '').trim()).filter(Boolean))];
-  document.getElementById('kat-scroll').innerHTML = katlar.map(k =>
-    `<div class="kat-chip${aktifKat === k ? ' active' : ''}" data-k="${k}">${k}</div>`
+  document.getElementById('kat-group').innerHTML = katlar.map(k =>
+    `<button class="kat-btn${aktifKat === k ? ' active' : ''}" data-k="${k}">${k}</button>`
   ).join('');
 }
-document.getElementById('kat-scroll').addEventListener('click', e => {
-  const c = e.target.closest('.kat-chip');
-  if (!c) return;
-  aktifKat = c.dataset.k;
+document.getElementById('kat-group').addEventListener('click', e => {
+  const b = e.target.closest('.kat-btn');
+  if (!b) return;
+  aktifKat = b.dataset.k;
   renderKategoriler();
   renderUrunler();
 });
 
-// ── Ürünler ──
+// ── Ürünler — liste ──
 function renderUrunler() {
   const liste = aktifKat === 'Hepsi' ? urunler : urunler.filter(u => (u.kategori || '').trim() === aktifKat);
-  const el = document.getElementById('urun-grid');
-  if (!liste.length) { el.innerHTML = '<div class="empty">Bu kategoride ürün yok.</div>'; return; }
-  el.innerHTML = liste.map(u => {
+  const el = document.getElementById('urun-liste');
+  if (!liste.length) {
+    el.innerHTML = '<div class="empty-msg">Bu kategoride ürün yok.</div>';
+    return;
+  }
+  // Her ürün için ayrı div oluştur — innerHTML string concat YOK
+  el.innerHTML = '';
+  liste.forEach(u => {
     const adet = sepet[u.id]?.adet || 0;
-    return `<div class="urun-card${adet > 0 ? ' in-cart' : ''}">
-      <div class="urun-name">${u.ad}</div>
-      <div class="urun-footer">
-        <div class="urun-price">₺${u.fiyat}</div>
+    const div = document.createElement('div');
+    div.className = 'urun-row' + (adet > 0 ? ' in-cart' : '');
+    div.innerHTML = `
+      <div class="urun-info">
+        <div class="urun-ad">${u.ad}</div>
+        <div class="urun-fiyat">₺${u.fiyat}</div>
+      </div>
+      <div class="qty-wrap">
         ${adet > 0
-          ? `<div class="qty-ctrl">
-               <button class="qty-btn" data-azalt="${u.id}">−</button>
-               <span class="qty-num">${adet}</span>
-               <button class="qty-btn" data-artir="${u.id}">+</button>
-             </div>`
+          ? `<button class="qty-btn" data-azalt="${u.id}">−</button>
+             <span class="qty-num">${adet}</span>
+             <button class="qty-btn" data-artir="${u.id}">+</button>`
           : `<button class="add-btn" data-artir="${u.id}">+</button>`
         }
-      </div>
-    </div>`;
-  }).join('');
+      </div>`;
+    el.appendChild(div);
+  });
 }
-document.getElementById('urun-grid').addEventListener('click', e => {
+
+document.getElementById('urun-liste').addEventListener('click', e => {
   const artir = e.target.closest('[data-artir]');
   const azalt = e.target.closest('[data-azalt]');
   if (artir) {
@@ -381,13 +415,15 @@ document.getElementById('urun-grid').addEventListener('click', e => {
     if (!u) return;
     if (!sepet[uid]) sepet[uid] = { ...u, adet: 0 };
     sepet[uid].adet++;
-    renderUrunler(); renderSepetBar();
+    renderUrunler();
+    renderSepetBar();
   } else if (azalt) {
     const uid = azalt.dataset.azalt;
     if (!sepet[uid]) return;
     sepet[uid].adet--;
     if (sepet[uid].adet <= 0) delete sepet[uid];
-    renderUrunler(); renderSepetBar();
+    renderUrunler();
+    renderSepetBar();
   }
 });
 
@@ -395,6 +431,7 @@ document.getElementById('urun-grid').addEventListener('click', e => {
 function renderSepetBar() {
   const items = Object.values(sepet).filter(s => s.adet > 0);
   const bar = document.getElementById('sepet-bar');
+  const seciliMasa = getSeciliMasa();
   if (items.length && seciliMasa) {
     bar.style.display = 'block';
     document.getElementById('sepet-toplam').textContent = '₺' + items.reduce((t, s) => t + s.fiyat * s.adet, 0);
@@ -402,22 +439,29 @@ function renderSepetBar() {
     bar.style.display = 'none';
   }
 }
+
 document.getElementById('btn-gonder').onclick = async () => {
   const items = Object.values(sepet).filter(s => s.adet > 0);
-  if (!seciliMasa) { alert('Masa seçin!'); return; }
+  const seciliMasaId = getSeciliMasa();
+  if (!seciliMasaId) { alert('Masa seçin!'); return; }
   if (!items.length) { alert('Sepet boş!'); return; }
-  const masa = masalar.find(m => m.id === seciliMasa);
+  const masa = masalar.find(m => m.id === seciliMasaId);
   await push(ref(db, 'siparisler'), {
-    garson: garsonAdi, masaId: seciliMasa,
-    masaAd: masa ? masa.ad : seciliMasa,
+    garson: garsonAdi,
+    masaId: seciliMasaId,
+    masaAd: masa ? masa.ad : seciliMasaId,
     urunler: items.map(i => ({ ad: i.ad, fiyat: i.fiyat, adet: i.adet })),
     toplam: items.reduce((t, i) => t + i.fiyat * i.adet, 0),
     not: document.getElementById('siparis-not').value.trim(),
-    durum: 'bekliyor', zaman: serverTimestamp()
+    durum: 'bekliyor',
+    zaman: serverTimestamp()
   });
-  sepet = {}; seciliMasa = null;
+  sepet = {};
+  document.getElementById('masa-select').value = '';
+  document.getElementById('masa-select').classList.remove('selected');
   document.getElementById('siparis-not').value = '';
-  renderMasalar(); renderUrunler(); renderSepetBar();
+  renderUrunler();
+  renderSepetBar();
   document.getElementById('tab-siparislerim').click();
 };
 
@@ -434,26 +478,34 @@ document.getElementById('btn-temizle').onclick = async () => {
   const t = Object.values(siparislerim).filter(s => s.durum === 'teslim');
   if (!t.length) { alert('Temizlenecek sipariş yok.'); return; }
   if (!confirm(t.length + ' sipariş kapatılsın mı?')) return;
-  const u = {};
-  t.forEach(s => { u['siparisler/' + s.id + '/durum'] = 'odendi'; });
-  await update(ref(db), u);
+  const updates = {};
+  t.forEach(s => { updates['siparisler/' + s.id + '/durum'] = 'odendi'; });
+  await update(ref(db), updates);
 };
 function renderSiparislerim() {
   const el = document.getElementById('sip-liste');
   let items = Object.values(siparislerim);
   if (aktifFiltre !== 'hepsi') items = items.filter(s => s.durum === aktifFiltre);
-  if (!items.length) { el.innerHTML = '<div class="empty">Gösterilecek sipariş yok.</div>'; return; }
+  if (!items.length) { el.innerHTML = '<div class="empty-msg">Gösterilecek sipariş yok.</div>'; return; }
   items.sort((a, b) => (b.zaman || 0) - (a.zaman || 0));
   const bc = { bekliyor:'b-bekliyor', hazirlaniyor:'b-hazirlaniyor', hazir:'b-hazir', teslim:'b-teslim', odendi:'b-odendi' };
   const bt = { bekliyor:'⏳ Bekliyor', hazirlaniyor:'🔥 Hazırlanıyor', hazir:'✅ Hazır — Teslim Al', teslim:'📦 Teslim Edildi', odendi:'✓ Ödendi' };
-  el.innerHTML = items.map(s => `
-    <div class="sip-card" style="${s.durum==='teslim'?'opacity:0.55;':''}">
-      <div class="sip-top"><div class="sip-masa">${s.masaAd}</div><div class="sip-sure">${sureFmt(s.zaman)}</div></div>
+  el.innerHTML = '';
+  items.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'sip-card';
+    if (s.durum === 'teslim') div.style.opacity = '0.55';
+    div.innerHTML = `
+      <div class="sip-top">
+        <div class="sip-masa">${s.masaAd}</div>
+        <div class="sip-sure">${sureFmt(s.zaman)}</div>
+      </div>
       <div class="sip-badge ${bc[s.durum]||''}">${bt[s.durum]||s.durum}</div>
       <div class="sip-urunler">${s.urunler.map(u => u.adet+'x '+u.ad).join(', ')}</div>
       ${s.not ? `<div style="font-size:0.78rem;color:var(--muted);margin-top:0.3rem;">📝 ${s.not}</div>` : ''}
-      <div class="sip-toplam">₺${s.toplam}</div>
-    </div>`).join('');
+      <div class="sip-toplam">₺${s.toplam}</div>`;
+    el.appendChild(div);
+  });
 }
 
 // ── Bildirim ──
@@ -462,16 +514,21 @@ function bildirimEkle(s) {
   if (!bildirimAktif) bildirimGoster();
 }
 function bildirimGoster() {
-  if (!bildirimKuyrugu.length) { bildirimAktif = false; document.getElementById('bildirim').style.display = 'none'; return; }
+  if (!bildirimKuyrugu.length) {
+    bildirimAktif = false;
+    document.getElementById('bildirim').style.display = 'none';
+    return;
+  }
   bildirimAktif = true;
   const s = bildirimKuyrugu[0];
   window._bildirimId = s.id;
-  document.getElementById('bildirim-masa').textContent = s.masaAd + ' — ' + s.urunler.map(u => u.adet+'x '+u.ad).join(', ');
+  document.getElementById('bil-masa').textContent = s.masaAd + ' — ' + s.urunler.map(u => u.adet+'x '+u.ad).join(', ');
   document.getElementById('bildirim').style.display = 'flex';
 }
 document.getElementById('btn-teslim').onclick = async () => {
   if (window._bildirimId) await update(ref(db, 'siparisler/' + window._bildirimId), { durum: 'teslim' });
-  bildirimKuyrugu.shift(); bildirimGoster();
+  bildirimKuyrugu.shift();
+  bildirimGoster();
 };
 
 function sureFmt(ts) {
