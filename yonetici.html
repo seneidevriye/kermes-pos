@@ -139,6 +139,17 @@
         <div class="form-group"><div class="form-label">Kullanıcı Adı</div><input type="text" id="garson-ad" placeholder="Örn: Ahmet"></div>
         <div class="form-group"><div class="form-label">Şifre</div><input type="text" id="garson-sifre" placeholder="1234" maxlength="20"></div>
       </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;margin-bottom:0.75rem;">
+        <div>
+          <div style="font-size:0.85rem;font-weight:600;">💰 Kasa Erişimi</div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:0.2rem;">Bu garson kasa ekranına girebilsin mi?</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+          <input type="checkbox" id="garson-kasa" style="opacity:0;width:0;height:0;position:absolute;">
+          <span id="toggle-track" style="position:absolute;inset:0;background:var(--border);border-radius:12px;transition:0.2s;"></span>
+          <span id="toggle-thumb" style="position:absolute;left:3px;top:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:0.2s;"></span>
+        </label>
+      </div>
       <button class="btn btn-primary" id="btn-garson-ekle">Ekle</button>
     </div>
     <div class="liste-title">Kayıtlı Garsonlar</div>
@@ -162,7 +173,7 @@
 
 <script type="module">
 import { db } from './firebase-config.js';
-import { ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { ref, push, onValue, remove, set, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const PIN = '1234';
 let pinGirilen = '';
@@ -230,6 +241,10 @@ document.getElementById('garson-liste').addEventListener('click', e => {
   const id = e.target.dataset.silId;
   if (id && confirm('Bu garsonu silmek istiyor musunuz?')) remove(ref(db, 'garsonlar/' + id));
 });
+document.getElementById('garson-liste').addEventListener('change', e => {
+  const id = e.target.dataset.kasaToggle;
+  if (id) update(ref(db, 'garsonlar/' + id), { kasa: e.target.checked });
+});
 
 function baslat() {
   onValue(ref(db, 'urunler'), snap => {
@@ -254,24 +269,45 @@ function baslat() {
     snap.forEach(c => { const v = c.val(); if (v && v.ad && v.sifre) liste.push({ id: c.key, ...v }); });
     if (!liste.length) { el.innerHTML = '<div class="bos">Henüz garson eklenmedi.</div>'; return; }
     el.innerHTML = liste.map(g =>
-      '<div class="item-row">' +
+      '<div class="item-row" style="flex-wrap:wrap;gap:0.5rem;">' +
         '<div class="item-info">' +
           '<div class="item-adi">👤 ' + g.ad + '</div>' +
-          '<div class="item-alt" style="margin-top:0.3rem;"><span class="sifre-badge">🔑 ' + g.sifre + '</span></div>' +
+          '<div class="item-alt" style="margin-top:0.3rem;display:flex;gap:0.4rem;align-items:center;">' +
+            '<span class="sifre-badge">🔑 ' + g.sifre + '</span>' +
+            (g.kasa ? '<span style="background:rgba(46,204,113,0.15);border:1px solid rgba(46,204,113,0.3);border-radius:6px;padding:0.1rem 0.5rem;font-size:0.72rem;color:#2ecc71;font-weight:700;">💰 Kasa</span>' : '') +
+          '</div>' +
         '</div>' +
-        '<button class="btn btn-danger" data-sil-id="' + g.id + '">Sil</button>' +
+        '<div style="display:flex;align-items:center;gap:0.5rem;">' +
+          '<label style="font-size:0.72rem;color:var(--muted);cursor:pointer;">' +
+            '<input type="checkbox" ' + (g.kasa ? 'checked' : '') + ' data-kasa-toggle="' + g.id + '" style="margin-right:4px;">Kasa' +
+          '</label>' +
+          '<button class="btn btn-danger" data-sil-id="' + g.id + '">Sil</button>' +
+        '</div>' +
       '</div>'
     ).join('');
   });
 }
 
+// Toggle animasyonu
+const kasaCb = document.getElementById('garson-kasa');
+const toggleTrack = document.getElementById('toggle-track');
+const toggleThumb = document.getElementById('toggle-thumb');
+kasaCb.addEventListener('change', () => {
+  toggleTrack.style.background = kasaCb.checked ? 'var(--green)' : 'var(--border)';
+  toggleThumb.style.left = kasaCb.checked ? '23px' : '3px';
+});
+
 async function garsonEkle() {
   const ad = document.getElementById('garson-ad').value.trim();
   const sifre = document.getElementById('garson-sifre').value.trim();
+  const kasaErisim = document.getElementById('garson-kasa').checked;
   if (!ad || !sifre) { alert('Ad ve şifre girin!'); return; }
-  await push(ref(db, 'garsonlar'), { ad, sifre });
+  await push(ref(db, 'garsonlar'), { ad, sifre, kasa: kasaErisim });
   document.getElementById('garson-ad').value = '';
   document.getElementById('garson-sifre').value = '';
+  document.getElementById('garson-kasa').checked = false;
+  toggleTrack.style.background = 'var(--border)';
+  toggleThumb.style.left = '3px';
 }
 
 async function urunEkle() {
