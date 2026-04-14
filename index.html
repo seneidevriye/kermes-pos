@@ -124,13 +124,26 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
 .bil-baslik { font-family:'Syne',sans-serif; font-size:1rem; color:#000; font-weight:700; }
 .bil-masa { font-size:0.78rem; color:rgba(0,0,0,0.65); }
 .btn-teslim { background:rgba(0,0,0,0.2); border:none; border-radius:8px; color:#000; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.78rem; padding:0.4rem 0.8rem; cursor:pointer; white-space:nowrap; }
+
+/* MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:200; align-items:center; justify-content:center; padding:1.5rem; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:1.75rem; width:100%; max-width:360px; display:flex; flex-direction:column; gap:1rem; }
+.modal-title { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800; }
+.modal-msg { font-size:0.82rem; min-height:18px; font-weight:600; }
+.modal-msg.err { color:var(--red); }
+.modal-msg.ok { color:var(--green); }
+.modal-row { display:flex; gap:0.5rem; }
+.btn-modal-iptal { flex:1; padding:0.85rem; border:1px solid var(--border); border-radius:10px; background:transparent; color:var(--muted); font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.9rem; cursor:pointer; }
+.btn-modal-kaydet { flex:1; padding:0.85rem; border:none; border-radius:10px; background:var(--accent); color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer; }
+.btn-sifre { background:transparent; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-size:0.72rem; padding:0.28rem 0.65rem; cursor:pointer; font-family:'DM Sans',sans-serif; }
 </style>
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="login-screen">
-  <div class="logo">ERYAMAN<em>ETKINLIK</em></div>
+  <div class="logo">KERMES<em>POS</em></div>
   <div class="login-box">
     <h2>Garson Girişi</h2>
     <input class="inp" type="text" id="inp-kullanici" placeholder="Kullanıcı adı" autocomplete="username">
@@ -151,6 +164,7 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
     <div class="topbar-logo">KERMES<em>POS</em></div>
     <div style="display:flex;align-items:center;gap:0.5rem;">
       <div class="user-chip">👤 <span id="badge-garson"></span></div>
+      <button class="btn-sifre" id="btn-sifre-ac">🔑 Şifre</button>
       <button class="btn-cikis" id="btn-cikis">Çıkış</button>
     </div>
   </div>
@@ -207,6 +221,22 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
       <span class="sepet-toplam" id="sepet-toplam">₺0</span>
     </div>
     <button class="btn-gonder" id="btn-gonder">SİPARİŞİ GÖNDER →</button>
+  </div>
+</div>
+
+
+<!-- ŞİFRE DEĞİŞTİR MODAL -->
+<div class="modal-overlay" id="sifre-modal">
+  <div class="modal-box">
+    <div class="modal-title">🔑 Şifre Değiştir</div>
+    <input class="inp" type="password" id="sifre-mevcut" placeholder="Mevcut şifre">
+    <input class="inp" type="password" id="sifre-yeni" placeholder="Yeni şifre">
+    <input class="inp" type="password" id="sifre-yeni2" placeholder="Yeni şifre (tekrar)">
+    <div class="modal-msg" id="sifre-msg"></div>
+    <div class="modal-row">
+      <button class="btn-modal-iptal" id="btn-sifre-iptal">İptal</button>
+      <button class="btn-modal-kaydet" id="btn-sifre-kaydet">Kaydet</button>
+    </div>
   </div>
 </div>
 
@@ -538,6 +568,39 @@ function sureFmt(ts) {
   if (dk < 60) return dk + 'dk önce';
   return Math.floor(dk / 60) + 'sa önce';
 }
+
+// ── Şifre Değiştir ──
+document.getElementById('btn-sifre-ac').onclick = () => {
+  document.getElementById('sifre-mevcut').value = '';
+  document.getElementById('sifre-yeni').value = '';
+  document.getElementById('sifre-yeni2').value = '';
+  document.getElementById('sifre-msg').textContent = '';
+  document.getElementById('sifre-msg').className = 'modal-msg';
+  document.getElementById('sifre-modal').classList.add('open');
+};
+document.getElementById('btn-sifre-iptal').onclick = () => {
+  document.getElementById('sifre-modal').classList.remove('open');
+};
+document.getElementById('sifre-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('sifre-modal'))
+    document.getElementById('sifre-modal').classList.remove('open');
+});
+document.getElementById('btn-sifre-kaydet').onclick = async () => {
+  const msg = document.getElementById('sifre-msg');
+  const mevcut = document.getElementById('sifre-mevcut').value.trim();
+  const yeni   = document.getElementById('sifre-yeni').value.trim();
+  const yeni2  = document.getElementById('sifre-yeni2').value.trim();
+  msg.className = 'modal-msg err';
+  if (!mevcut || !yeni || !yeni2) { msg.textContent = 'Tüm alanları doldurun!'; return; }
+  if (garsonlarCache[garsonKey]?.sifre !== mevcut) { msg.textContent = 'Mevcut şifre yanlış!'; return; }
+  if (yeni.length < 3) { msg.textContent = 'Yeni şifre en az 3 karakter olmalı!'; return; }
+  if (yeni !== yeni2) { msg.textContent = 'Yeni şifreler eşleşmiyor!'; return; }
+  await update(ref(db, 'garsonlar/' + garsonKey), { sifre: yeni });
+  msg.className = 'modal-msg ok';
+  msg.textContent = '✅ Şifre başarıyla değiştirildi!';
+  setTimeout(() => document.getElementById('sifre-modal').classList.remove('open'), 1500);
+};
+
 setInterval(renderSiparislerim, 10000);
 </script>
 </body>
