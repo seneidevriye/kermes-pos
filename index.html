@@ -313,6 +313,8 @@ document.getElementById('btn-bildirim-kapat').addEventListener('click', async ()
 
 // Sipariş gönder
 document.getElementById('btn-siparis-gonder').addEventListener('click', siparisGonder);
+
+function baslat() {
   onValue(ref(db, 'masalar'), snap => {
     masalar = [];
     if (snap.exists()) snap.forEach(c => masalar.push({ id: c.key, ...c.val() }));
