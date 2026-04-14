@@ -56,12 +56,17 @@
   .kat-chip.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
 
   .urun-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 1.5rem; }
-  .urun-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden; }
-  .urun-card:active { transform: scale(0.97); }
+  .urun-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; transition: all 0.15s; position: relative; overflow: hidden; }
   .urun-card.added { border-color: var(--accent); }
   .urun-adi { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem; }
   .urun-fiyat { font-size: 0.85rem; color: var(--accent); font-weight: 700; }
-  .urun-adet-badge { position: absolute; top: 8px; right: 8px; background: var(--accent); color: #000; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
+  .urun-alt { display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem; }
+  .adet-kontrol { display: flex; align-items: center; gap: 0.4rem; }
+  .adet-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; line-height: 1; flex-shrink: 0; }
+  .adet-btn:active { background: var(--accent); color: #000; }
+  .adet-sayi { font-weight: 700; font-size: 0.95rem; min-width: 18px; text-align: center; color: var(--accent); }
+  .urun-ekle-btn { width: 26px; height: 26px; border-radius: 50%; border: none; background: var(--accent); color: #000; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+  .urun-ekle-btn:active { opacity: 0.8; }
 
   .sepet-bos { text-align: center; color: var(--muted); padding: 3rem 1rem; font-size: 0.95rem; }
   .toplam-bar { background: var(--surface); border-top: 1px solid var(--border); padding: 1rem; position: sticky; bottom: 0; }
@@ -149,7 +154,17 @@
   </div>
 
   <div id="siparislerim-tab" class="content" style="display:none;">
+    <div style="display:flex;gap:0.5rem;margin-bottom:1rem;overflow-x:auto;scrollbar-width:none;">
+      <div class="kat-chip active" data-filtre="hepsi">Hepsi</div>
+      <div class="kat-chip" data-filtre="bekliyor">⏳ Bekleyen</div>
+      <div class="kat-chip" data-filtre="hazirlaniyor">🔥 Hazırlanıyor</div>
+      <div class="kat-chip" data-filtre="hazir">✅ Hazır</div>
+      <div class="kat-chip" data-filtre="teslim">📦 Teslim</div>
+    </div>
     <div id="siparislerim-liste"></div>
+    <div style="margin-top:1rem;">
+      <button class="btn" style="background:rgba(231,76,60,0.15);color:var(--red);border:1px solid rgba(231,76,60,0.3);width:100%;font-family:'DM Sans',sans-serif;font-weight:700;" id="btn-siparislerim-temizle">🗑️ Teslim Edilenleri Temizle</button>
+    </div>
   </div>
 
   <div class="toplam-bar" id="toplam-bar" style="display:none;">
@@ -185,6 +200,7 @@ let urunler = [];
 let sepet = {};
 let seciliMasa = null;
 let aktifKategori = 'Tümü';
+let aktifFiltre = 'hepsi';
 let siparislerim = {};
 let bildirimGosterilenler = new Set();
 let bildirimKuyrugu = [];
@@ -259,8 +275,25 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// Sipariş gönder
-document.getElementById('btn-siparis-gonder').addEventListener('click', siparisGonder);
+// Siparişlerim filtresi
+document.getElementById('siparislerim-tab').addEventListener('click', e => {
+  const chip = e.target.closest('[data-filtre]');
+  if (!chip) return;
+  aktifFiltre = chip.dataset.filtre;
+  document.querySelectorAll('[data-filtre]').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  siparislerimRender();
+});
+
+// Siparişlerim temizle (sadece bu garsonun teslim edilenleri)
+document.getElementById('btn-siparislerim-temizle').addEventListener('click', async () => {
+  const teslimler = Object.values(siparislerim).filter(s => s.durum === 'teslim');
+  if (!teslimler.length) { alert('Temizlenecek teslim edilmiş sipariş yok.'); return; }
+  if (!confirm(teslimler.length + ' teslim edilmiş sipariş listeden kaldırılsın mı?')) return;
+  const updates = {};
+  teslimler.forEach(s => { updates['siparisler/' + s.id + '/durum'] = 'odendi'; });
+  await update(ref(db), updates);
+});
 
 // Bildirim kapat
 document.getElementById('btn-bildirim-kapat').addEventListener('click', async () => {
@@ -271,7 +304,8 @@ document.getElementById('btn-bildirim-kapat').addEventListener('click', async ()
   bildirimSiradakiniGoster();
 });
 
-function baslat() {
+// Sipariş gönder
+document.getElementById('btn-siparis-gonder').addEventListener('click', siparisGonder);
   onValue(ref(db, 'masalar'), snap => {
     masalar = [];
     if (snap.exists()) snap.forEach(c => masalar.push({ id: c.key, ...c.val() }));
@@ -347,23 +381,41 @@ function urunGridRender() {
   document.getElementById('urun-grid').innerHTML = filtered.map(u => {
     const adet = sepet[u.id] ? sepet[u.id].adet : 0;
     return '<div class="urun-card' + (adet > 0 ? ' added' : '') + '" data-urun-id="' + u.id + '">' +
-      (adet > 0 ? '<div class="urun-adet-badge">' + adet + '</div>' : '') +
       '<div class="urun-adi">' + u.ad + '</div>' +
-      '<div class="urun-fiyat">₺' + u.fiyat + '</div>' +
-      '</div>';
+      '<div class="urun-alt">' +
+        '<div class="urun-fiyat">₺' + u.fiyat + '</div>' +
+        (adet > 0
+          ? '<div class="adet-kontrol">' +
+              '<button class="adet-btn" data-azalt="' + u.id + '">−</button>' +
+              '<span class="adet-sayi">' + adet + '</span>' +
+              '<button class="adet-btn" data-artir="' + u.id + '">+</button>' +
+            '</div>'
+          : '<button class="urun-ekle-btn" data-artir="' + u.id + '">+</button>'
+        ) +
+      '</div>' +
+    '</div>';
   }).join('');
 }
 
 document.getElementById('urun-grid').addEventListener('click', e => {
-  const card = e.target.closest('.urun-card');
-  if (!card) return;
-  const uid = card.dataset.urunId;
-  const urun = urunler.find(u => u.id === uid);
-  if (!urun) return;
-  if (!sepet[uid]) sepet[uid] = { ...urun, adet: 0 };
-  sepet[uid].adet++;
-  urunGridRender();
-  sepetGuncelle();
+  const artirBtn = e.target.closest('[data-artir]');
+  const azaltBtn = e.target.closest('[data-azalt]');
+  if (artirBtn) {
+    const uid = artirBtn.dataset.artir;
+    const urun = urunler.find(u => u.id === uid);
+    if (!urun) return;
+    if (!sepet[uid]) sepet[uid] = { ...urun, adet: 0 };
+    sepet[uid].adet++;
+    urunGridRender();
+    sepetGuncelle();
+  } else if (azaltBtn) {
+    const uid = azaltBtn.dataset.azalt;
+    if (!sepet[uid]) return;
+    sepet[uid].adet--;
+    if (sepet[uid].adet <= 0) delete sepet[uid];
+    urunGridRender();
+    sepetGuncelle();
+  }
 });
 
 function sepetGuncelle() {
@@ -406,8 +458,9 @@ async function siparisGonder() {
 
 function siparislerimRender() {
   const liste = document.getElementById('siparislerim-liste');
-  const items = Object.values(siparislerim);
-  if (!items.length) { liste.innerHTML = '<div class="sepet-bos">Aktif siparişiniz yok 🎉</div>'; return; }
+  let items = Object.values(siparislerim);
+  if (aktifFiltre !== 'hepsi') items = items.filter(s => s.durum === aktifFiltre);
+  if (!items.length) { liste.innerHTML = '<div class="sepet-bos">Gösterilecek sipariş yok.</div>'; return; }
   items.sort((a, b) => (b.zaman || 0) - (a.zaman || 0));
   const durumClass = { bekliyor:'durum-bekliyor', hazirlaniyor:'durum-hazirlaniyor', hazir:'durum-hazir', teslim:'durum-teslim', odendi:'durum-odendi' };
   const durumText = { bekliyor:'⏳ Bekliyor', hazirlaniyor:'🔥 Hazırlanıyor', hazir:'✅ Hazır — Teslim Al', teslim:'📦 Teslim Edildi', odendi:'💰 Ödendi' };
