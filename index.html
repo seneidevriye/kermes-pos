@@ -207,23 +207,27 @@ let bildirimKuyrugu = [];
 let bildirimAktif = false;
 let garsonlarCache = {};
 
-// Firebase'den garsonları yükle, sonra localStorage kontrolü yap
+// Firebase'den garsonları yükle
+let garsonlarYuklendi = false;
 onValue(ref(db, 'garsonlar'), snap => {
   garsonlarCache = {};
   if (snap.exists()) snap.forEach(c => { garsonlarCache[c.key] = { id: c.key, ...c.val() }; });
 
-  // localStorage'da kayıtlı oturum var mı?
-  const kayitliKey = localStorage.getItem('kermes_garson_key');
-  if (kayitliKey && garsonlarCache[kayitliKey] && !garsonAdi) {
-    const g = garsonlarCache[kayitliKey];
-    garsonAdi = g.ad;
-    garsonKey = kayitliKey;
-    document.getElementById('garson-adi-badge').textContent = g.ad;
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'flex';
-    baslat();
+  // İlk yüklemede localStorage kontrolü yap
+  if (!garsonlarYuklendi) {
+    garsonlarYuklendi = true;
+    const kayitliKey = localStorage.getItem('kermes_garson_key');
+    if (kayitliKey && garsonlarCache[kayitliKey] && !garsonAdi) {
+      const g = garsonlarCache[kayitliKey];
+      garsonAdi = g.ad;
+      garsonKey = kayitliKey;
+      document.getElementById('garson-adi-badge').textContent = g.ad;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'flex';
+      baslat();
+    }
   }
-}, { onlyOnce: false });
+});
 
 // Giriş
 document.getElementById('btn-giris').addEventListener('click', girisYap);
@@ -238,6 +242,8 @@ function girisYap() {
   const kullanici = document.getElementById('garson-kullanici').value.trim();
   const sifre = document.getElementById('garson-sifre').value.trim();
   if (!kullanici || !sifre) { document.getElementById('login-hata').textContent = 'Kullanıcı adı ve şifre girin!'; return; }
+
+  if (!garsonlarYuklendi) { document.getElementById('login-hata').textContent = 'Bağlanıyor, lütfen bekleyin...'; return; }
 
   const bulunan = Object.values(garsonlarCache).find(g => g.ad === kullanici && g.sifre === sifre);
   if (!bulunan) {
