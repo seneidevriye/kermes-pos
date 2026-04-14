@@ -97,7 +97,8 @@
   <div class="logo">KERMES<span>POS</span></div>
   <div class="login-card">
     <h2>Garson Girişi</h2>
-    <input type="password" id="garson-sifre" placeholder="Şifrenizi girin..." maxlength="20">
+    <input type="text" id="garson-kullanici" placeholder="Kullanıcı adı..." maxlength="30">
+    <input type="password" id="garson-sifre" placeholder="Şifre..." maxlength="20">
     <div class="login-hata" id="login-hata"></div>
     <button class="btn btn-primary" id="btn-giris">Giriş Yap</button>
   </div>
@@ -203,14 +204,18 @@ document.getElementById('btn-giris').addEventListener('click', girisYap);
 document.getElementById('garson-sifre').addEventListener('keypress', e => {
   if (e.key === 'Enter') girisYap();
 });
+document.getElementById('garson-kullanici').addEventListener('keypress', e => {
+  if (e.key === 'Enter') document.getElementById('garson-sifre').focus();
+});
 
 function girisYap() {
+  const kullanici = document.getElementById('garson-kullanici').value.trim();
   const sifre = document.getElementById('garson-sifre').value.trim();
-  if (!sifre) { document.getElementById('login-hata').textContent = 'Şifre girin!'; return; }
+  if (!kullanici || !sifre) { document.getElementById('login-hata').textContent = 'Kullanıcı adı ve şifre girin!'; return; }
 
-  const bulunan = Object.values(garsonlarCache).find(g => g.sifre === sifre);
+  const bulunan = Object.values(garsonlarCache).find(g => g.ad === kullanici && g.sifre === sifre);
   if (!bulunan) {
-    document.getElementById('login-hata').textContent = 'Yanlış şifre!';
+    document.getElementById('login-hata').textContent = 'Kullanıcı adı veya şifre yanlış!';
     document.getElementById('garson-sifre').value = '';
     return;
   }
