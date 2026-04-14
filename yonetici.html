@@ -113,7 +113,14 @@
       <div class="form-group"><div class="form-label">Ürün Adı</div><input type="text" id="urun-ad" placeholder="Örn: Çay"></div>
       <div class="form-row">
         <div class="form-group"><div class="form-label">Fiyat (₺)</div><input type="number" id="urun-fiyat" placeholder="0" min="0"></div>
-        <div class="form-group"><div class="form-label">Kategori</div><input type="text" id="urun-kat" placeholder="İçecek, Tatlı..."></div>
+        <div class="form-group"><div class="form-label">Kategori</div>
+          <select id="urun-kat" style="width:100%;padding:0.8rem 1rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;">
+            <option value="Çorba">Çorba</option>
+            <option value="Yemek ve Izgara">Yemek ve Izgara</option>
+            <option value="Tatlı ve Pasta">Tatlı ve Pasta</option>
+            <option value="İçecek">İçecek</option>
+          </select>
+        </div>
       </div>
       <button class="btn btn-primary" id="btn-urun-ekle">Ekle</button>
     </div>
@@ -313,7 +320,7 @@ async function garsonEkle() {
 async function urunEkle() {
   const ad = document.getElementById('urun-ad').value.trim();
   const fiyat = parseFloat(document.getElementById('urun-fiyat').value);
-  const kat = document.getElementById('urun-kat').value.trim() || 'Genel';
+  const kat = document.getElementById('urun-kat').value;
   if (!ad || isNaN(fiyat) || fiyat < 0) { alert('Ürün adı ve geçerli fiyat girin!'); return; }
   await push(ref(db, 'urunler'), { ad, fiyat, kategori: kat });
   document.getElementById('urun-ad').value = '';
