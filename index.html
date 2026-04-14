@@ -112,8 +112,8 @@
     <h2>Garson Girişi</h2>
     <input type="text" id="garson-kullanici" placeholder="Kullanıcı adı..." maxlength="30">
     <input type="password" id="garson-sifre" placeholder="Şifre..." maxlength="20">
-    <div class="login-hata" id="login-hata"></div>
-    <button class="btn btn-primary" id="btn-giris">Giriş Yap</button>
+    <div id="login-hata" style="color:#e74c3c;font-size:0.85rem;text-align:center;min-height:20px;font-weight:600;"></div>
+    <button class="btn btn-primary" onclick="girisYap()">Giriş Yap</button>
   </div>
   <div style="display:flex;gap:1rem;margin-top:0.5rem;">
     <a href="mutfak.html" style="color:var(--muted);font-size:0.85rem;text-decoration:none;">🍳 Mutfak</a>
@@ -128,7 +128,7 @@
     <div class="header-title">KERMES<span style="color:var(--accent2)">POS</span></div>
     <div style="display:flex;align-items:center;gap:0.5rem;">
       <div class="garson-badge">👤 <span id="garson-adi-badge"></span></div>
-      <button class="cikis-btn" id="btn-cikis">Çıkış</button>
+      <button class="cikis-btn" onclick="cikisYap()">Çıkış</button>
     </div>
   </div>
 
@@ -191,7 +191,7 @@
 
 <script type="module">
 import { db } from './firebase-config.js';
-import { ref, push, onValue, update, get, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { ref, push, onValue, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 let garsonAdi = '';
 let garsonKey = '';
@@ -212,7 +212,7 @@ onValue(ref(db, 'garsonlar'), snap => {
   garsonlarCache = {};
   if (snap.exists()) snap.forEach(c => { garsonlarCache[c.key] = { id: c.key, ...c.val() }; });
 
-  // Sayfa açılışında localStorage kontrolü (sadece bir kez)
+  // Sayfa açılışında localStorage kontrolü
   const kayitliKey = localStorage.getItem('kermes_garson_key');
   if (kayitliKey && garsonlarCache[kayitliKey] && !garsonAdi) {
     const g = garsonlarCache[kayitliKey];
@@ -225,59 +225,51 @@ onValue(ref(db, 'garsonlar'), snap => {
   }
 });
 
-// Giriş
-document.getElementById('btn-giris').addEventListener('click', girisYap);
+window.girisYap = function() {
+  const hataEl = document.getElementById('login-hata');
+  const kullanici = document.getElementById('garson-kullanici').value.trim();
+  const sifre = document.getElementById('garson-sifre').value.trim();
+
+  if (!kullanici || !sifre) {
+    hataEl.textContent = 'Kullanıcı adı ve şifre girin!';
+    return;
+  }
+
+  if (Object.keys(garsonlarCache).length === 0) {
+    hataEl.textContent = 'Bağlanıyor, birkaç saniye bekleyin...';
+    return;
+  }
+
+  const bulunan = Object.values(garsonlarCache).find(g => g.ad === kullanici && g.sifre === sifre);
+  if (!bulunan) {
+    hataEl.textContent = 'Kullanıcı adı veya şifre yanlış!';
+    document.getElementById('garson-sifre').value = '';
+    return;
+  }
+
+  garsonAdi = bulunan.ad;
+  garsonKey = bulunan.id;
+  localStorage.setItem('kermes_garson_key', bulunan.id);
+  document.getElementById('garson-adi-badge').textContent = bulunan.ad;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  hataEl.textContent = '';
+  baslat();
+};
+
 document.getElementById('garson-sifre').addEventListener('keypress', e => {
-  if (e.key === 'Enter') girisYap();
+  if (e.key === 'Enter') window.girisYap();
 });
 document.getElementById('garson-kullanici').addEventListener('keypress', e => {
   if (e.key === 'Enter') document.getElementById('garson-sifre').focus();
 });
 
-async function girisYap() {
-  const hataEl = document.getElementById('login-hata');
-  const kullanici = document.getElementById('garson-kullanici').value.trim();
-  const sifre = document.getElementById('garson-sifre').value.trim();
-
-  if (!kullanici || !sifre) { hataEl.textContent = 'Kullanıcı adı ve şifre girin!'; return; }
-
-  hataEl.textContent = 'Kontrol ediliyor...';
-  document.getElementById('btn-giris').disabled = true;
-
-  try {
-    const snap = await get(ref(db, 'garsonlar'));
-    garsonlarCache = {};
-    if (snap.exists()) snap.forEach(c => { garsonlarCache[c.key] = { id: c.key, ...c.val() }; });
-
-    const bulunan = Object.values(garsonlarCache).find(g => g.ad === kullanici && g.sifre === sifre);
-    if (!bulunan) {
-      hataEl.textContent = 'Kullanıcı adı veya şifre yanlış!';
-      document.getElementById('garson-sifre').value = '';
-      document.getElementById('btn-giris').disabled = false;
-      return;
-    }
-
-    garsonAdi = bulunan.ad;
-    garsonKey = bulunan.id;
-    localStorage.setItem('kermes_garson_key', bulunan.id);
-    document.getElementById('garson-adi-badge').textContent = bulunan.ad;
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'flex';
-    hataEl.textContent = '';
-    baslat();
-  } catch (err) {
-    hataEl.textContent = 'Bağlantı hatası, tekrar deneyin.';
-    document.getElementById('btn-giris').disabled = false;
-  }
-}
-
-// Çıkış
-document.getElementById('btn-cikis').addEventListener('click', () => {
+window.cikisYap = function() {
   if (confirm('Çıkış yapmak istiyor musunuz?')) {
     localStorage.removeItem('kermes_garson_key');
     location.reload();
   }
-});
+};
 
 // Tab geçişleri
 document.querySelectorAll('.tab').forEach(tab => {
