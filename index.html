@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -291,13 +290,13 @@ function baslat() {
 
   onValue(ref(db, 'masalar'), snap => {
     masalar = [];
-    if (snap.exists()) snap.forEach(c => masalar.push({ id: c.key, ...c.val() }));
+    if (snap.exists()) { const v = snap.val(); masalar = Object.entries(v).map(([id, d]) => ({ id, ...d })); }
     renderMasalar();
   });
 
   onValue(ref(db, 'urunler'), snap => {
     urunler = [];
-    if (snap.exists()) snap.forEach(c => urunler.push({ id: c.key, ...c.val() }));
+    if (snap.exists()) { const v = snap.val(); urunler = Object.entries(v).map(([id, d]) => ({ id, ...d })); }
     aktifKat = 'Hepsi';
     renderKategoriler();
     renderUrunler();
