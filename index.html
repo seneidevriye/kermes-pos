@@ -183,7 +183,7 @@
 
 <script type="module">
 import { db } from './firebase-config.js';
-import { ref, push, onValue, update, get, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { ref, push, onValue, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 let garsonAdi = '';
 let garsonKey = '';
@@ -290,7 +290,7 @@ document.getElementById('btn-bildirim-kapat').addEventListener('click', async ()
 document.getElementById('btn-siparis-gonder').addEventListener('click', siparisGonder);
 
 function baslat() {
-  get(ref(db, 'urunler')).then(snap => {
+  onValue(ref(db, 'urunler'), snap => {
     urunler = [];
     if (snap.exists()) snap.forEach(c => urunler.push({ id: c.key, ...c.val() }));
     aktifKategori = 'Hepsi';
@@ -298,7 +298,7 @@ function baslat() {
     urunGridRender();
   });
 
-  get(ref(db, 'masalar')).then(snap => {
+  onValue(ref(db, 'masalar'), snap => {
     masalar = [];
     if (snap.exists()) snap.forEach(c => masalar.push({ id: c.key, ...c.val() }));
     masaGridRender();
