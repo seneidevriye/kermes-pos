@@ -207,25 +207,21 @@ let bildirimKuyrugu = [];
 let bildirimAktif = false;
 let garsonlarCache = {};
 
-// Firebase'den garsonları yükle
-let garsonlarYuklendi = false;
+// Firebase'den garsonları sürekli dinle (cache için)
 onValue(ref(db, 'garsonlar'), snap => {
   garsonlarCache = {};
   if (snap.exists()) snap.forEach(c => { garsonlarCache[c.key] = { id: c.key, ...c.val() }; });
 
-  // İlk yüklemede localStorage kontrolü yap
-  if (!garsonlarYuklendi) {
-    garsonlarYuklendi = true;
-    const kayitliKey = localStorage.getItem('kermes_garson_key');
-    if (kayitliKey && garsonlarCache[kayitliKey] && !garsonAdi) {
-      const g = garsonlarCache[kayitliKey];
-      garsonAdi = g.ad;
-      garsonKey = kayitliKey;
-      document.getElementById('garson-adi-badge').textContent = g.ad;
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'flex';
-      baslat();
-    }
+  // Sayfa açılışında localStorage kontrolü (sadece bir kez)
+  const kayitliKey = localStorage.getItem('kermes_garson_key');
+  if (kayitliKey && garsonlarCache[kayitliKey] && !garsonAdi) {
+    const g = garsonlarCache[kayitliKey];
+    garsonAdi = g.ad;
+    garsonKey = kayitliKey;
+    document.getElementById('garson-adi-badge').textContent = g.ad;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    baslat();
   }
 });
 
@@ -238,28 +234,43 @@ document.getElementById('garson-kullanici').addEventListener('keypress', e => {
   if (e.key === 'Enter') document.getElementById('garson-sifre').focus();
 });
 
-function girisYap() {
+async function girisYap() {
+  const hataEl = document.getElementById('login-hata');
   const kullanici = document.getElementById('garson-kullanici').value.trim();
   const sifre = document.getElementById('garson-sifre').value.trim();
-  if (!kullanici || !sifre) { document.getElementById('login-hata').textContent = 'Kullanıcı adı ve şifre girin!'; return; }
 
-  if (!garsonlarYuklendi) { document.getElementById('login-hata').textContent = 'Bağlanıyor, lütfen bekleyin...'; return; }
+  if (!kullanici || !sifre) { hataEl.textContent = 'Kullanıcı adı ve şifre girin!'; return; }
 
-  const bulunan = Object.values(garsonlarCache).find(g => g.ad === kullanici && g.sifre === sifre);
-  if (!bulunan) {
-    document.getElementById('login-hata').textContent = 'Kullanıcı adı veya şifre yanlış!';
-    document.getElementById('garson-sifre').value = '';
-    return;
+  hataEl.textContent = 'Kontrol ediliyor...';
+  document.getElementById('btn-giris').disabled = true;
+
+  try {
+    // Her zaman Firebase'den taze veri çek
+    const { get } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+    const snap = await get(ref(db, 'garsonlar'));
+    garsonlarCache = {};
+    if (snap.exists()) snap.forEach(c => { garsonlarCache[c.key] = { id: c.key, ...c.val() }; });
+
+    const bulunan = Object.values(garsonlarCache).find(g => g.ad === kullanici && g.sifre === sifre);
+    if (!bulunan) {
+      hataEl.textContent = 'Kullanıcı adı veya şifre yanlış!';
+      document.getElementById('garson-sifre').value = '';
+      document.getElementById('btn-giris').disabled = false;
+      return;
+    }
+
+    garsonAdi = bulunan.ad;
+    garsonKey = bulunan.id;
+    localStorage.setItem('kermes_garson_key', bulunan.id);
+    document.getElementById('garson-adi-badge').textContent = bulunan.ad;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    hataEl.textContent = '';
+    baslat();
+  } catch (err) {
+    hataEl.textContent = 'Bağlantı hatası, tekrar deneyin.';
+    document.getElementById('btn-giris').disabled = false;
   }
-
-  garsonAdi = bulunan.ad;
-  garsonKey = bulunan.id;
-  localStorage.setItem('kermes_garson_key', bulunan.id);
-  document.getElementById('garson-adi-badge').textContent = bulunan.ad;
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  document.getElementById('login-hata').textContent = '';
-  baslat();
 }
 
 // Çıkış
