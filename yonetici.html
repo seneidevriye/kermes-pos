@@ -136,7 +136,7 @@
     <div class="add-card">
       <div class="add-card-title">Yeni Garson Ekle</div>
       <div class="form-row">
-        <div class="form-group"><div class="form-label">Ad Soyad</div><input type="text" id="garson-ad" placeholder="Ahmet"></div>
+        <div class="form-group"><div class="form-label">Kullanıcı Adı</div><input type="text" id="garson-ad" placeholder="Örn: Ahmet"></div>
         <div class="form-group"><div class="form-label">Şifre</div><input type="text" id="garson-sifre" placeholder="1234" maxlength="20"></div>
       </div>
       <button class="btn btn-primary" id="btn-garson-ekle">Ekle</button>
@@ -251,7 +251,8 @@ function baslat() {
     const el = document.getElementById('garson-liste');
     if (!snap.exists()) { el.innerHTML = '<div class="bos">Henüz garson eklenmedi.</div>'; return; }
     const liste = [];
-    snap.forEach(c => liste.push({ id: c.key, ...c.val() }));
+    snap.forEach(c => { const v = c.val(); if (v && v.ad && v.sifre) liste.push({ id: c.key, ...v }); });
+    if (!liste.length) { el.innerHTML = '<div class="bos">Henüz garson eklenmedi.</div>'; return; }
     el.innerHTML = liste.map(g =>
       '<div class="item-row">' +
         '<div class="item-info">' +
